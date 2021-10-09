@@ -1,7 +1,8 @@
 import { css, DefaultTheme } from "styled-components";
 
-const purple = ({ opacity = 1 } = {}) => `rgba(39, 0, 84, ${opacity})`;
-const blue = ({ opacity = 1 } = {}) => `hsla(240, 100%, 20%, ${opacity})`;
+const purple = ({ opacity = 1 } = {}): string => `rgba(39, 0, 84, ${opacity})`;
+const blue = ({ opacity = 1 } = {}): string =>
+  `hsla(240, 100%, 20%, ${opacity})`;
 
 const theme: DefaultTheme = {
   colors: {
@@ -26,6 +27,7 @@ const theme: DefaultTheme = {
 
   shadows: {
     sparse: "0px 11px 67px -4px rgba(0, 0, 0, 0.6)",
+    medium: "0 3px 6px rgba(140, 149, 159, 0.15)",
   },
 
   transitions: {

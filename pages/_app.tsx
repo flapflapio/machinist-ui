@@ -1,6 +1,5 @@
 import type { AppProps } from "next/app";
 import Head from "next/head";
-import PropTypes from "prop-types";
 import { useEffect } from "react";
 import styled, { ThemeProvider } from "styled-components";
 import theme from "../src/util/styles";
@@ -11,7 +10,7 @@ const Footer = styled.footer`
   display: none;
 `;
 
-export default function App({ Component, pageProps }: AppProps) {
+export default function App({ Component, pageProps }: AppProps): JSX.Element {
   // Below is for MUI integration with Next.js SSR
   useEffect(() => {
     const jssStyles = document.querySelector("#jss-server-side");
@@ -22,7 +21,8 @@ export default function App({ Component, pageProps }: AppProps) {
     <>
       {/* prettier-ignore */}
       <Head>
-        <title>My App</title>
+        <title>Machinist</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no" />
         <link rel="icon"       href={`${assetPrefix}/favicon.ico`} />
         <link rel="preconnect" href="https://fonts.gstatic.com" />
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=B612:wght@700&display=swap" />
@@ -35,8 +35,3 @@ export default function App({ Component, pageProps }: AppProps) {
     </>
   );
 }
-
-App.propTypes = {
-  Component: PropTypes.elementType.isRequired,
-  pageProps: PropTypes.object.isRequired,
-};
