@@ -1,4 +1,4 @@
-import { ServerStyleSheets as ServerStyleSheetsMUI } from "@material-ui/core";
+// import { ServerStyleSheets as ServerStyleSheetsMUI } from "@material-ui/core";
 import Document, {
   DocumentContext,
   Head,
@@ -6,7 +6,7 @@ import Document, {
   Main,
   NextScript,
 } from "next/document";
-import { Children } from "react";
+import { Children, ReactChild, ReactFragment, ReactPortal } from "react";
 import { ServerStyleSheet as ServerStyleSheetsSC } from "styled-components";
 
 /**
@@ -14,8 +14,15 @@ import { ServerStyleSheet as ServerStyleSheetsSC } from "styled-components";
  * match" bug that happens with Next.js SSR with styled-components and MUI.
  */
 export default class MyDocument extends Document {
-  static async getInitialProps(ctx: DocumentContext) {
-    const sheetMUI = new ServerStyleSheetsMUI();
+  static async getInitialProps(
+    ctx: DocumentContext
+  ): Promise<{
+    styled: (ReactChild | ReactFragment | ReactPortal)[];
+    styles: JSX.Element;
+    html: string;
+    head?: JSX.Element[];
+  }> {
+    // const sheetMUI = new ServerStyleSheetsMUI();
     const sheetSC = new ServerStyleSheetsSC();
     const originalRenderPage = ctx.renderPage;
 
@@ -23,7 +30,7 @@ export default class MyDocument extends Document {
       ctx.renderPage = () =>
         originalRenderPage({
           enhanceApp: (App) => (props) =>
-            sheetSC.collectStyles(sheetMUI.collect(<App {...props} />)),
+            sheetSC.collectStyles(<App {...props} />),
         });
 
       const initialProps = await Document.getInitialProps(ctx);
@@ -31,7 +38,7 @@ export default class MyDocument extends Document {
         ...initialProps,
         styled: [
           ...Children.toArray(initialProps.styles),
-          sheetMUI.getStyleElement(),
+          // sheetMUI.getStyleElement(),
         ],
         styles: (
           <>
@@ -45,7 +52,7 @@ export default class MyDocument extends Document {
     }
   }
 
-  render() {
+  render(): JSX.Element {
     return (
       <Html>
         <Head />
