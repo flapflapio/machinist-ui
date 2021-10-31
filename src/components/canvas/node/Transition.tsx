@@ -6,6 +6,7 @@ import {
   Point,
   Transition as GraphTransition,
   useGraphActions,
+  computeLine,
 } from "../../data/graph";
 
 const svgNs = "http://www.w3.org/2000/svg";
@@ -22,6 +23,14 @@ type TransitionProps = ComponentPropsWithoutRef<"line"> & {
   graph?: Graph;
 };
 
+/**
+ * These are some notes that I am taking while implementing the auto-adjustment
+ * for the transitions.
+ *
+ * The auto-adjust should work something like:
+ *
+ *
+ */
 const Transition = memo(
   ({ id, transition, graph, ...props }: TransitionProps): JSX.Element => {
     const me = useRef<SVGLineElement>(null);
@@ -29,21 +38,36 @@ const Transition = memo(
 
     useEffect(() => {
       modifyTransition({ id, ref: me });
-      return () => modifyTransition({ id, ref: null });
+      // return () => modifyTransition({ id, ref: null });
     }, []);
 
-    const state = (
-      s: { state: string; offset: Offset },
+    const point = (
+      s: { state: string; offset?: Offset; point?: Point },
       scalingFactor = 1
     ): Point =>
       graph.throwPointToStateEdge({
         stateId: s.state,
         offset: s.offset,
+        point: s.point,
         scalingFactor,
       });
 
-    const start: Point = state(transition.start);
-    const end: Point = state({ ...transition.end, offset: { x: -1, y: -1 } });
+    const midPoint = (p1: Point, p2: Point): Point => ({
+      x: Math.min(p2.x, p1.x) + Math.abs(p2.x - p1.x) / 2,
+      y: Math.min(p2.y, p1.y) + Math.abs(p2.y - p1.y) / 2,
+    });
+
+    const startState = graph.pointForState(transition.start.state);
+    const endState = graph.pointForState(transition.end.state);
+    const mid = midPoint(startState, endState);
+    const offsetPoint = (state: string) =>
+      point({
+        state,
+        point: mid,
+      });
+
+    const start = offsetPoint(transition.start.state);
+    const end = offsetPoint(transition.end.state);
 
     return (
       <Line

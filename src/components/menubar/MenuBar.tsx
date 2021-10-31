@@ -8,27 +8,28 @@ import {
 } from "@ant-design/icons";
 import { Button, Menu } from "antd";
 import SubMenu from "antd/lib/menu/SubMenu";
-import { useCallback, useState } from "react";
-import styled, { StyledComponent } from "styled-components";
+import { ComponentPropsWithoutRef, useCallback, useState } from "react";
+import styled from "styled-components";
+import theme from "../../util/styles";
 
-const Root = styled.div`
-  width: 256px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
+const Root = styled.div``;
 
 const ToggleButton = styled(Button)`
-  margin-bottom: 16px;
+  margin-bottom: 2px;
+  width: 100%;
 `;
 
 const ToggleIcon = styled(DoubleLeftOutlined)<{ $collapsed?: boolean }>`
   transform: rotate(90deg);
-  transition: cubic-bezier(0.075, 0.82, 0.165, 1);
+  &&& {
+    transition: transform 0.3s ${theme.transitions.atndMenuBarBezier};
+  }
   ${({ $collapsed }) => $collapsed && `transform: rotate(-90deg)`}
 `;
 
-const MenuBar = (): JSX.Element => {
+type MenuBarProps = ComponentPropsWithoutRef<"div">;
+
+const MenuBar = ({ ...props }: MenuBarProps): JSX.Element => {
   const [state, setState] = useState({ collapsed: false });
 
   const toggle = useCallback(
@@ -37,10 +38,7 @@ const MenuBar = (): JSX.Element => {
   );
 
   return (
-    <Root>
-      <ToggleButton type="primary" onClick={toggle}>
-        <ToggleIcon $collapsed={state.collapsed} />
-      </ToggleButton>
+    <Root {...props}>
       <Menu
         mode="inline"
         theme="light"
@@ -48,6 +46,13 @@ const MenuBar = (): JSX.Element => {
         defaultSelectedKeys={["1"]}
         defaultOpenKeys={["sub1"]}
       >
+        {/* <Menu.Item> */}
+        <li>
+          <ToggleButton type="primary" onClick={toggle}>
+            <ToggleIcon $collapsed={state.collapsed} />
+          </ToggleButton>
+        </li>
+        {/* </Menu.Item> */}
         <Menu.Item key="1" icon={<PieChartOutlined />}>
           Option 1
         </Menu.Item>
@@ -77,5 +82,4 @@ const MenuBar = (): JSX.Element => {
 };
 
 export default MenuBar;
-
-export { MenuBar };
+export type { MenuBarProps };

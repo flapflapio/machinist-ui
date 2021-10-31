@@ -107,7 +107,7 @@ const State = memo(
     // When the node gets unrendered, it removes its reference from the store
     useEffect(() => {
       modifyState({ id, ref: me });
-      return () => modifyState({ id, ref: null });
+      // return () => modifyState({ id, ref: null });
     }, []);
 
     return (

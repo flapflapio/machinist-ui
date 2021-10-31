@@ -25,8 +25,24 @@ declare module "styled-components" {
     };
 
     transitions: {
+      /**
+       * A medium cubiz-bezier
+       */
       lifted: string;
+
+      /**
+       * A fast cubic-bezier
+       */
       liftedFast: string;
+
+      /**
+       * The cubic-bezier used in the antd Menu component
+       */
+      atndMenuBarBezier: string;
+
+      /**
+       * Some other unknown property
+       */
       [key: string]: string;
     };
 

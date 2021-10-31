@@ -30,14 +30,26 @@ type Size = {
 };
 
 type State = {
-  id: string;
+  /**
+   * If id is "q_", the state is unassigned to the graph. If you try and insert
+   * such a state into the store, it will be assigned the next available id
+   * computed from the existing states.
+   */
+  id: "q_" | string;
+
   ending: boolean;
   location: Point;
   ref: MutableRefObject<HTMLDivElement>;
 };
 
 type Transition = {
-  id: string;
+  /**
+   * If id is "t_", the transition is unassigned to the graph. If you try and
+   * insert such a transition into the store, it will be assigned the next
+   * available id computed from the existing transitions.
+   */
+  id: "t_" | string;
+
   start: { state: string; offset: Offset };
   end: { state: string; offset: Offset };
   symbol: string;
@@ -45,13 +57,16 @@ type Transition = {
 };
 
 type Graph = {
+  // STATE
   root: MutableRefObject<SVGSVGElement>;
   size: Size;
   starting: State;
   states: State[];
   transitions: Transition[];
 
+  // METHODS
   vb: () => string;
+  pointForState: (id: string) => Point;
   clientCoordsToSvgCoords: (p: Point) => Point;
   svgCoordsToClientCoords: (p: Point) => Point;
   eventToSvgCoords: (e: MouseEvent<unknown>) => Point;
@@ -117,7 +132,7 @@ const computeThirdPoint = (
   p1: Point,
   p2: Point
 ): Point => {
-  // These are 3 coeffecients for a quadratic equation:
+  // These are 3 coefficients for a quadratic equation:
   // e * p3.x^2 + f * p3.x + g
   const e = line.a ** 2 + 1;
   const f = 2 * line.a * line.b - line.a * p1.y - line.a * p1.y - 2 * p1.x;
@@ -166,8 +181,8 @@ const blankGraph = (): Graph => ({
   },
 
   clientCoordsToSvgCoords({ x, y }) {
-    if (!this?.root?.current) return origin();
-    const ctm = this.root.current.getScreenCTM();
+    const ctm = this?.root?.current?.getScreenCTM();
+    if (!ctm) return origin();
     return {
       x: (x - ctm.e) / ctm.a,
       y: (y - ctm.f) / ctm.d,
@@ -194,15 +209,11 @@ const blankGraph = (): Graph => ({
     { stateId, point, offset, scalingFactor } = { stateId: "q0" }
   ) {
     const state = (this?.states as State[])?.find((s) => s.id === stateId);
-
     if (!state || !state?.ref?.current) return origin();
-
     const rect = state.ref.current.getBoundingClientRect();
     const radius = rect.width / 2;
     const centerPoint = { x: rect.left + radius, y: rect.top + radius };
-
     if (!point && !offset) return centerPoint || origin();
-
     const newPoint =
       point ||
       (offset
@@ -220,6 +231,10 @@ const blankGraph = (): Graph => ({
       y: scaling * pointThree.y,
     });
   },
+
+  pointForState(id) {
+    return (this as Graph)?.states?.find((s) => s.id === id)?.location;
+  },
 });
 
 const GraphContext = createContext<Graph>(blankGraph());
@@ -232,12 +247,50 @@ const GraphActionsContext = createContext<GraphActionsContextType>({
   setSize: () => null,
 });
 
+/**
+ * A namespace for some utility functions
+ */
 const utils = {
+  /**
+   * Extracts the next available id from the given array of states or
+   * transitions.
+   *
+   * @param stateOrTransition
+   * @returns
+   */
+  nextAvailableId(
+    statesOrTransitions: { id: string }[],
+    prefix: string = null
+  ): string {
+    let pref = "q";
+
+    const nextId =
+      statesOrTransitions.reduce((acc, next) => {
+        pref = next.id.substring(0, 1);
+        const id = parseInt(next.id.slice(1), 10);
+        return acc > id ? acc : id;
+      }, -1) + 1;
+
+    return `${prefix ?? pref}${nextId}`;
+  },
+
+  /**
+   * Extract the states from a dispatched action
+   *
+   * @param action
+   * @returns
+   */
   extractStates: (action: GraphAction): State[] =>
     action.state
       ? [...(action.states || []), action.state]
       : action.states || [],
 
+  /**
+   * Extract the transitions from a dispatched action
+   *
+   * @param action
+   * @returns
+   */
   extractTransitions: (action: GraphAction): Transition[] =>
     action.transition
       ? [...(action.transitions || []), action.transition]
@@ -257,15 +310,41 @@ const sizeEqualsSize = (size1: Size, size2: Size): boolean =>
 const reducers: {
   [A in GraphActionType]: (store: Graph, action: GraphAction) => Graph;
 } = {
+  /**
+   * Add new states to the store
+   *
+   * @param store
+   * @param action
+   * @returns
+   */
   ADD: (store, action) =>
     action.state || action.states || action.transition || action.transitions
       ? {
+          // OLD STORE
           ...store,
+
+          // MODIFY STATES
           states: (() => {
             const addMe = utils.extractStates(action);
-            const brandNewStates = addMe.filter(
-              (s) => !store.states.map((ss) => ss.id).includes(s.id)
-            );
+            const brandNewStates = (() => {
+              const processed: State[] = [];
+              return addMe
+                .filter((s) => !store.states.map((ss) => ss.id).includes(s.id))
+                .map((s) => {
+                  const newState =
+                    s.id === "q_"
+                      ? {
+                          ...s,
+                          id: utils.nextAvailableId(
+                            [...store.states, ...processed],
+                            "q"
+                          ),
+                        }
+                      : s;
+                  processed.push(newState);
+                  return newState;
+                });
+            })();
             return [
               ...store.states.map((s) => ({
                 ...s,
@@ -274,11 +353,31 @@ const reducers: {
               ...brandNewStates,
             ];
           })(),
+
+          // MODIFY TRANSITIONS
           transitions: (() => {
             const addMe = utils.extractTransitions(action);
-            const brandNewTransitions = addMe.filter(
-              (t) => !store.transitions.map((tt) => tt.id).includes(t.id)
-            );
+            const brandNewTransitions = (() => {
+              const processed: Transition[] = [];
+              return addMe
+                .filter(
+                  (t) => !store.transitions.map((tt) => tt.id).includes(t.id)
+                )
+                .map((t) => {
+                  const newTransition =
+                    t.id === "t_"
+                      ? {
+                          ...t,
+                          id: utils.nextAvailableId(
+                            [...store.states, ...processed],
+                            "t"
+                          ),
+                        }
+                      : t;
+                  processed.push(newTransition);
+                  return newTransition;
+                });
+            })();
             return [
               ...store.transitions.map((t) => ({
                 ...t,
@@ -290,6 +389,13 @@ const reducers: {
         }
       : store,
 
+  /**
+   * Remove states from the store
+   *
+   * @param store
+   * @param action
+   * @returns
+   */
   REMOVE: (store, action) =>
     action.ids && action.ids.length > 0
       ? {
@@ -301,19 +407,52 @@ const reducers: {
         }
       : store,
 
+  /**
+   * Empty the store
+   *
+   * @param store
+   * @returns
+   */
   CLEAR: (store) => ({ ...store, states: [], transitions: [] }),
 
+  /**
+   * TODO: currently this reducer is a noop
+   *
+   * @param store
+   * @returns
+   */
   STEP: (store) => store,
 
+  /**
+   * Call some arbitrary function on the store. This is just an escape hatch,
+   * use the other reducers for most purposes.
+   *
+   * @param store
+   * @param action
+   * @returns
+   */
   MANIPULATE: (store, action) =>
     action.manipulation ? action.manipulation(store) : store,
 
+  /**
+   * Set the root SVG element of the store
+   *
+   * @param store
+   * @param action
+   * @returns
+   */
   SET_ROOT: (store, action) =>
     action.root !== store.root ? { ...store, root: action.root } : store,
 
+  /**
+   * Modify the size attribute of the store
+   *
+   * @param store
+   * @param action
+   * @returns
+   */
   SET_SIZE: (store, action) =>
-    action.size &&
-    ((s): s is Size => typeof action.size !== "function")(action.size)
+    action.size && typeof action.size !== "function"
       ? !sizeEqualsSize(action.size, store.size)
         ? { ...store, size: action.size }
         : store
@@ -323,6 +462,14 @@ const reducers: {
         })(),
 };
 
+/**
+ * This is the master reducer - dispatches parameters to the appropriate reducer
+ * from the above map
+ *
+ * @param store
+ * @param action
+ * @returns
+ */
 const reducer = (store: Graph, action: GraphAction): Graph =>
   action && action.type in reducers
     ? reducers[action.type](store, action)

@@ -1,4 +1,3 @@
-import { Button } from "antd";
 import { ComponentPropsWithoutRef, useCallback, useEffect } from "react";
 import styled from "styled-components";
 import { origin, ref, useGraphActions } from "../data/graph";
@@ -11,12 +10,15 @@ const Root = styled.div`
   position: relative;
 `;
 
-const Canvas = ({ ...props }: ComponentPropsWithoutRef<"div">): JSX.Element => {
+type CanvasProps = ComponentPropsWithoutRef<"div">;
+
+const Canvas = ({ ...props }: CanvasProps): JSX.Element => {
   const { dispatch } = useGraphActions();
   const buttonRef = ref<HTMLButtonElement>(null);
 
   const clear = useCallback(() => dispatch({ type: "CLEAR" }), [dispatch]);
-  const add = useCallback(
+
+  const addInitial = useCallback(
     () =>
       dispatch({
         type: "ADD",
@@ -47,18 +49,33 @@ const Canvas = ({ ...props }: ComponentPropsWithoutRef<"div">): JSX.Element => {
     [dispatch]
   );
 
+  const addFresh = useCallback(
+    () =>
+      dispatch({
+        type: "ADD",
+        state: {
+          id: "q_",
+          ending: false,
+          location: { x: 0, y: 0 },
+          ref: null,
+        },
+      }),
+    [dispatch]
+  );
+
   useEffect(() => {
-    dispatch({
-      type: "SET_SIZE",
-      size: (s) => ({ ...s, width: 500, height: 300 }),
-    });
-    add();
-    return clear;
-  }, [clear, add, dispatch]);
+    addInitial();
+    return () =>
+      dispatch({
+        type: "REMOVE",
+        ids: ["q0", "q1", "t0"],
+      });
+  }, [clear, addInitial, dispatch]);
 
   return (
     <Root {...props}>
-      <Button
+      {/* TODO: FLAP-71 - Move this buttons to the sidebar */}
+      {/* <Button
         ref={buttonRef}
         style={{
           display: "relative",
@@ -73,11 +90,10 @@ const Canvas = ({ ...props }: ComponentPropsWithoutRef<"div">): JSX.Element => {
           display: "relative",
           inset: "-50px auto auto 100px",
         }}
-        onClick={add}
+        onClick={addFresh}
       >
         ADD
-      </Button>
-
+      </Button> */}
       <EdgeLayer />
       <NodeLayer />
     </Root>
@@ -85,4 +101,4 @@ const Canvas = ({ ...props }: ComponentPropsWithoutRef<"div">): JSX.Element => {
 };
 
 export default Canvas;
-export { Canvas };
+export type { CanvasProps };

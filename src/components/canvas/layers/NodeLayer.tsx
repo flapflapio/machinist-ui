@@ -6,12 +6,14 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import styled from "styled-components";
 import {
   Graph,
   GraphAction,
+  origin,
   Point,
   State as GraphState,
   useGraphAndGraphActions,
@@ -28,12 +30,7 @@ const Root = styled.div`
 
   & > ${StateRoot} {
     position: absolute;
-    /* inset: -50% auto auto -50%; */
   }
-
-  /* !!! DEBUG !!! */
-  border: 5px solid yellow;
-  /* !!! DEBUG !!! */
 `;
 
 type NodeLayerProps = ComponentPropsWithoutRef<"div">;
@@ -115,57 +112,109 @@ const usePassiveAdjust = (
   graph: Graph,
   adjust: (s: GraphState, p: Point) => void
 ) =>
-  useEffect(() => {
-    graph.states.forEach((s) => {
-      adjust(s, s.location);
-    });
-  }, [graph, adjust]);
+  useEffect(() => graph.states.forEach((s) => adjust(s, s.location)), [
+    graph,
+    adjust,
+  ]);
+
+const useStateMapper = (onMouseDown: (s: GraphState, i: number) => void) =>
+  useCallback(
+    (s: GraphState, i: number) => (
+      <State
+        key={s.id}
+        id={s.id}
+        onMouseDown={() => onMouseDown(s, i)}
+        style={{
+          transform: `translate(
+            calc(${s.location.x}px - 50%),
+            calc(${s.location.y}px - 50%)
+          )`,
+        }}
+      />
+    ),
+    [onMouseDown]
+  );
+
+const useMouseDown = (
+  setStateAndIndex: Dispatch<SetStateAction<[GraphState, number]>>,
+  startDragging: (i: number) => void
+) =>
+  useCallback(
+    (s: GraphState, i: number) => {
+      setStateAndIndex([s, i]);
+      startDragging(i);
+    },
+    [setStateAndIndex, startDragging]
+  );
+
+const useDoubleClicker = <T,>(
+  callback: (e: MouseEvent<T>) => void,
+  numberOfClicks = 2,
+  timeout = 200
+): ((e: MouseEvent<T>) => void) => {
+  const count = useRef(0);
+  return useCallback(
+    (e: MouseEvent<T>) => {
+      count.current += 1;
+      if (count.current >= numberOfClicks) callback(e);
+      setTimeout(() => {
+        count.current = 0;
+      }, timeout);
+    },
+    [count, callback, numberOfClicks, timeout]
+  );
+};
 
 const NodeLayer = ({ ...props }: NodeLayerProps): JSX.Element => {
-  // HOOKS
   const { graph, dispatch } = useGraphAndGraphActions();
   const { dragging, startDragging, stopDragging } = useDragging(graph);
   const adjust = useAdjust();
-  const onMouseMove = useMouseMove({ graph, dispatch, dragging, adjust });
+  const mouseMove = useMouseMove({ graph, dispatch, dragging, adjust });
   const [stateAndIndex, setStateAndIndex] = useState<[GraphState, number]>([
     null,
     -1,
   ]);
+  const onMouseDown = useMouseDown(setStateAndIndex, startDragging);
+  const stateAndIndexToElement = useStateMapper(onMouseDown);
+  const onMouseMove = useCallback(
+    (e: MouseEvent<HTMLDivElement>) => {
+      if (
+        stateAndIndex[0] &&
+        stateAndIndex[1] >= 0 &&
+        stateAndIndex[1] < dragging.length
+      ) {
+        mouseMove(...stateAndIndex)(e);
+      }
+    },
+    [stateAndIndex, mouseMove, dragging]
+  );
 
-  // EFFECTS
+  const doubleClick = useDoubleClicker(
+    useCallback(
+      (e: MouseEvent<HTMLDivElement>) =>
+        dispatch({
+          type: "ADD",
+          state: {
+            id: "q_",
+            ending: false,
+            location: graph.eventToSvgCoords(e),
+            ref: null,
+          },
+        }),
+      [dispatch, graph]
+    )
+  );
+
   usePassiveAdjust(graph, adjust);
 
-  // RENDER
   return (
     <Root
       {...props}
+      onClick={doubleClick}
       onMouseUp={stopDragging}
-      onMouseMove={(e: MouseEvent<HTMLDivElement>) => {
-        if (
-          stateAndIndex[0] &&
-          stateAndIndex[1] >= 0 &&
-          stateAndIndex[1] < dragging.length
-        ) {
-          onMouseMove(...stateAndIndex)(e);
-        }
-      }}
+      onMouseMove={onMouseMove}
     >
-      {graph.states.map((s, i) => (
-        <State
-          key={s.id}
-          id={s.id}
-          onMouseDown={() => {
-            setStateAndIndex([s, i]);
-            startDragging(i);
-          }}
-          style={{
-            transform: `translate(
-              calc(${s.location.x}px - 50%),
-              calc(${s.location.y}px - 50%)
-            )`,
-          }}
-        />
-      ))}
+      {graph.states.map(stateAndIndexToElement)}
     </Root>
   );
 };

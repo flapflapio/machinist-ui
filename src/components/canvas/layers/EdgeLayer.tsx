@@ -17,9 +17,6 @@ const Root: StyledComponent<"svg", DefaultTheme> = styled.svg.attrs(
   box-sizing: border-box;
 
   text-align: center;
-  /* !!! DEBUG !!! */
-  border: 1px solid black;
-  /* !!! DEBUG !!! */
 `;
 
 type EdgeLayerProps = ComponentPropsWithoutRef<"svg">;
@@ -28,7 +25,7 @@ const EdgeLayer = ({ ...props }: EdgeLayerProps): JSX.Element => {
   const graph = useGraph();
   const { setRoot } = useGraphActions();
   const root = useRef<SVGSVGElement>(null);
-  const viewBox = useMemo(() => graph.vb(), [graph]);
+  const viewBox = useMemo(() => "0 0 100% 100%", []);
 
   useEffect(() => {
     setRoot(root);

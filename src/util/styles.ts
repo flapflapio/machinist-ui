@@ -33,6 +33,7 @@ const theme: DefaultTheme = {
   transitions: {
     lifted: "all 700ms cubic-bezier(0.75, 0, 0.25, 1)",
     liftedFast: "all 0.2s cubic-bezier(0.075, 0.82, 0.165, 1)",
+    atndMenuBarBezier: "cubic-bezier(0.215, 0.61, 0.355, 1)",
   },
 
   mixins: {

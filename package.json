@@ -10,7 +10,9 @@
     "export": "next export",
     "deploy": "yarn build && yarn export -o build",
     "docker": "yarn deploy && docker-compose up -d",
-    "docker-down": "docker-compose down "
+    "docker-down": "docker-compose down",
+    "run-ci": "gh workflow run -r $(git rev-parse --abbrev-ref HEAD)",
+    "view-ci": "gh run view"
   },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
