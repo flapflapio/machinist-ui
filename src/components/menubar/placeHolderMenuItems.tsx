@@ -8,13 +8,19 @@ import {
 import { Menu } from "antd";
 import SubMenu from "antd/lib/menu/SubMenu";
 
-const placeHolderMenuItems = (): JSX.Element => (
+const placeHolderMenuItems = ({
+  openDebugger = () => null,
+  openRunInputMenu = () => null,
+}: {
+  openDebugger?: () => void;
+  openRunInputMenu?: () => void;
+} = {}): JSX.Element => (
   <>
-    <Menu.Item key="1" icon={<PieChartOutlined />}>
-      Option 1
+    <Menu.Item key="1" onClick={openDebugger} icon={<PieChartOutlined />}>
+      Debug
     </Menu.Item>
-    <Menu.Item key="2" icon={<DesktopOutlined />}>
-      Option 2
+    <Menu.Item key="2" onClick={openRunInputMenu} icon={<DesktopOutlined />}>
+      Run Input
     </Menu.Item>
     <Menu.Item key="3" icon={<ContainerOutlined />}>
       Option 3

@@ -155,6 +155,9 @@
       "sourceType": "module"
     },
     "rules": {
+      "prefer-destructuring": "off",
+      "import/prefer-default-export": "off",
+      "import/no-named-as-default": "warn",
       "no-use-before-define": "off",
       "@typescript-eslint/no-use-before-define": ["error"],
       "quotes": "off",

@@ -3,28 +3,10 @@ import {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from "react";
-import styled, { DefaultTheme, StyledComponent } from "styled-components";
-import { useGraph, useGraphActions } from "../../data/graph";
-import Transition, { Line, svgNs } from "../node/Transition";
-
-const Root: StyledComponent<"svg", DefaultTheme> = styled.svg.attrs(
-  ({ viewBox }) => ({
-    viewBox: viewBox ?? "0 0 200 200",
-    xmlns: svgNs,
-  })
-)`
-  width: 100%;
-  height: 100%;
-  position: absolute !important;
-  inset: 0 auto auto 0;
-  z-index: 1;
-  box-sizing: border-box;
-
-  text-align: center;
-`;
+import styled from "styled-components";
+import { Line } from "../../node/Transition";
 
 const BackgroundLine = styled(Line)`
   filter: invert(98%) sepia(2%) saturate(253%) hue-rotate(258deg)
@@ -103,7 +85,6 @@ const Lines = ({
     </g>
   );
 };
-
 const Background = styled(Lines)`
   width: 100%;
   height: 100%;
@@ -113,26 +94,5 @@ const Background = styled(Lines)`
   box-sizing: border-box;
 `;
 
-type EdgeLayerProps = ComponentPropsWithoutRef<"svg">;
-const EdgeLayer = ({ ...props }: EdgeLayerProps): JSX.Element => {
-  const graph = useGraph();
-  const { setRoot } = useGraphActions();
-  const root = useRef<SVGSVGElement>(null);
-  const viewBox = useMemo(() => "0 0 100% 100%", []);
-
-  useEffect(() => {
-    setRoot(root);
-    return () => setRoot(null);
-  }, [root, setRoot]);
-
-  return (
-    <Root ref={root} viewBox={viewBox} {...props}>
-      <Background />
-      {graph.transitions.map((t) => (
-        <Transition key={t.id} id={t.id} transition={t} graph={graph} />
-      ))}
-    </Root>
-  );
-};
-
-export default EdgeLayer;
+export default Background;
+export { Background };

@@ -28,6 +28,7 @@ const theme: DefaultTheme = {
   shadows: {
     sparse: "0px 11px 67px -4px rgba(0, 0, 0, 0.6)",
     medium: "0 3px 6px rgba(140, 149, 159, 0.15)",
+    dark: "3px 3px 6px rgba(140, 149, 159, 0.568)",
   },
 
   transitions: {
@@ -52,3 +53,4 @@ const theme: DefaultTheme = {
 };
 
 export default theme;
+export { theme };

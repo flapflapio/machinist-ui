@@ -1,37 +1,26 @@
 import { ComponentPropsWithoutRef, useMemo } from "react";
-import styled, { DefaultTheme, StyledComponent } from "styled-components";
+import styled from "styled-components";
 import { midPoint, Point, useGraph } from "../../data/graph";
 import { Text } from "../node/State";
 
-type LabelRootComponent = StyledComponent<
-  "p",
-  DefaultTheme,
-  {
-    theme: DefaultTheme;
-  } & {
-    $x?: number;
-    $y?: number;
-  },
-  never
->;
-
-const LabelRoot: LabelRootComponent = styled(Text).attrs<{
+type LabelRootProps = {
   $x?: number;
   $y?: number;
-}>(({ $x, $y }) => ({
+};
+
+const LabelRoot = styled(Text).attrs<LabelRootProps>(({ $x, $y }) => ({
   style: {
     transform: `
       translate(calc(${$x ?? 0}px - 50%), calc(${$y ?? 0}px - 50%))
     `,
   },
-}))`
+}))<LabelRootProps>`
   position: absolute;
   inset: 0 auto auto 0;
 
   font-size: 1.25rem;
   height: 1.5em;
   border-radius: 50%;
-  //border: 1px solid green;
   background: rgba(255, 255, 255, 0.8);
 `;
 
@@ -77,4 +66,4 @@ const Labels = (): JSX.Element => {
 };
 
 export { Labels, Label, LabelRoot };
-export type { LabelProps, LabelRootComponent as LabelRootProps };
+export type { LabelProps };

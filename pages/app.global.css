@@ -60,11 +60,11 @@ h6,
 h7,
 h8,
 h9 {
-  margin-bottom: 1em;
-  font-family: "Open Sans", "DejaVu Sans", "Sans", sans-serif;
+  /* margin-bottom: 1em; */
+  /* font-family: "Open Sans", "DejaVu Sans", "Sans", sans-serif;
   font-weight: 500;
   font-style: normal;
-  color: #ba3c23;
+  color: #ba3c23; */
   text-rendering: optimizeLegibility;
 }
 

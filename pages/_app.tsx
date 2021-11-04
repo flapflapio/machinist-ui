@@ -2,7 +2,7 @@ import type { AppProps } from "next/app";
 import Head from "next/head";
 import { useEffect } from "react";
 import styled, { ThemeProvider } from "styled-components";
-import theme from "../src/util/styles";
+import { theme } from "../src/util/styles";
 import "./app.global.css";
 
 const Footer = styled.footer`

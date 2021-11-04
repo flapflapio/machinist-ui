@@ -10,6 +10,8 @@ import {
 } from "react";
 
 type KeyChordsStore = {
+  enabled: boolean;
+
   control: boolean;
   shift: boolean;
   alt: boolean;
@@ -37,6 +39,7 @@ const isKeyChordAction = (obj: AnyObject): obj is KeyChordAction =>
   "key" in obj && "enabled" in obj;
 
 const blankStore = (): KeyChordsStore => ({
+  enabled: false,
   control: false,
   shift: false,
   alt: false,
@@ -104,7 +107,7 @@ const useKeyChordStore = (): [KeyChordsStore, Dispatch<KeyChordAction>] =>
   useContext(KeyChordsStoreContext);
 
 const useKeyPressHook = (enabled: boolean): ((e: { key: string }) => void) => {
-  const dispatch = useContext(KeyChordsStoreContext)[1];
+  const dispatch = useKeyChordStore()[1];
   return useCallback(
     (e) =>
       (e.key === "Control" || e.key === "Alt" || e.key === "Shift") &&
@@ -129,18 +132,18 @@ const useKeyPressListener = (): void => {
 };
 
 const useScrollListener = (): void => {
-  const dispatch = useContext(KeyChordsStoreContext)[1];
+  const [store, dispatch] = useContext(KeyChordsStoreContext);
 
   const scrollValueListener = useCallback(
     (e: WheelEvent) => {
-      e.preventDefault();
+      if (store.enabled) e.preventDefault();
       dispatch({
         scroll: e.deltaY,
         scrollDirection:
           e.deltaY < 0 ? "Down" : e.deltaY > 0 ? "Up" : "Neutral",
       });
     },
-    [dispatch]
+    [dispatch, store]
   );
 
   useEffect(() => {
@@ -167,8 +170,15 @@ const KeyChordsListener = ({ children }: ChildrenProps): JSX.Element => {
   return <>{children}</>;
 };
 
-const KeyChordsProvider = ({ children }: ChildrenProps): JSX.Element => {
-  const [store, dispatch] = useReducer(reducer, null, blankStore);
+const KeyChordsProvider = ({
+  enabled = false,
+  children,
+}: ChildrenProps & { enabled?: boolean }): JSX.Element => {
+  const [store, dispatch] = useReducer(reducer, null, () => ({
+    ...blankStore(),
+    enabled,
+  }));
+
   const pkg = useMemo<[KeyChordsStore, Dispatch<KeyChordAction>]>(
     () => [store, dispatch],
     [store, dispatch]

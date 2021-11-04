@@ -10,6 +10,13 @@ import {
   useReducer,
 } from "react";
 
+/**
+ * This generic type does the same thing as {@link Partial} (it makes all the
+ * properties in `T` optional) except that it excludes the types specified by
+ * `K`
+ */
+type PartialExcept<T, K extends keyof T> = Pick<T, K> & Partial<Omit<T, K>>;
+
 type Point = {
   x: number;
   y: number;
@@ -56,13 +63,26 @@ type Transition = {
   ref: MutableRefObject<SVGLineElement>;
 };
 
+/**
+ * This type is the same as the {@link Transition Transition type} except that
+ * it maps from a state to the user's mouse location.
+ *
+ * This object is used for when the user is drawing a new state.
+ */
+type TransitionInProgress = Omit<Transition, "id" | "end" | "symbol"> & {
+  id: "tINPROGRESS";
+  active: boolean;
+  end: Point;
+};
+
 type Graph = {
   // STATE
   root: MutableRefObject<SVGSVGElement>;
   size: Size;
-  starting: State;
+  starting: string;
   states: State[];
   transitions: Transition[];
+  transitionInProgress: TransitionInProgress;
 
   // METHODS
   vb: () => string;
@@ -100,12 +120,11 @@ type GraphAction = {
   states?: State[];
   transition?: Transition;
   transitions?: Transition[];
+  transitionInProgress?: Partial<TransitionInProgress>;
   manipulation?: (graph: Graph) => Graph;
   root?: MutableRefObject<SVGSVGElement>;
   size?: Size | ((s: Size) => Size);
 };
-
-type PartialExcept<T, K extends keyof T> = Pick<T, K> & Partial<Omit<T, K>>;
 
 type GraphActionsContextType = {
   dispatch: Dispatch<GraphAction>;
@@ -113,6 +132,7 @@ type GraphActionsContextType = {
   setRoot: (root: MutableRefObject<SVGSVGElement>) => void;
   deleteElement: (id: string) => void;
   modifyState: (partialState: PartialExcept<State, "id">) => void;
+  setStartState: (state: string | PartialExcept<State, "id">) => void;
   modifyTransition: (
     partialTransition: PartialExcept<Transition, "id">
   ) => void;
@@ -126,7 +146,11 @@ const midPoint = (p1: Point, p2: Point): Point => ({
 });
 
 const computeLine = (p1: Point, p2: Point): { a: number; b: number } => {
-  const a = (p2.y - p1.y) / (p2.x - p1.x);
+  const deltaX = p2.x - p1.x;
+
+  // BE CAREFUL OF DIVIDE BY ZERO!
+  const a = (p2.y - p1.y) / (deltaX === 0 ? 1 : deltaX);
+
   const b = p1.y - a * p1.x;
   return { a, b };
 };
@@ -175,6 +199,13 @@ const blankGraph = (): Graph => ({
   starting: null,
   states: [],
   transitions: [],
+  transitionInProgress: {
+    id: "tINPROGRESS",
+    active: false,
+    end: origin(),
+    ref: null,
+    start: null,
+  },
 
   vb() {
     return (
@@ -230,7 +261,7 @@ const blankGraph = (): Graph => ({
 
     const line = computeLine(centerPoint, newPoint);
     const pointThree = computeThirdPoint(radius, line, centerPoint, newPoint);
-    const scaling = scalingFactor || 0.9;
+    const scaling = scalingFactor ?? 0.9;
     return (this as Graph).clientCoordsToSvgCoords({
       x: scaling * pointThree.x,
       y: scaling * pointThree.y,
@@ -242,14 +273,17 @@ const blankGraph = (): Graph => ({
   },
 });
 
+const nullf = () => null;
+
 const GraphContext = createContext<Graph>(blankGraph());
 const GraphActionsContext = createContext<GraphActionsContextType>({
-  dispatch: () => null,
-  modifyState: () => null,
-  modifyTransition: () => null,
-  deleteElement: () => null,
-  setRoot: () => null,
-  setSize: () => null,
+  dispatch: nullf,
+  modifyState: nullf,
+  modifyTransition: nullf,
+  deleteElement: nullf,
+  setRoot: nullf,
+  setSize: nullf,
+  setStartState: nullf,
 });
 
 /**
@@ -323,7 +357,11 @@ const reducers: {
    * @returns
    */
   ADD: (store, action) =>
-    action.state || action.states || action.transition || action.transitions
+    action.state ||
+    action.states ||
+    action.transition ||
+    action.transitions ||
+    action.transitionInProgress
       ? {
           // OLD STORE
           ...store,
@@ -374,7 +412,7 @@ const reducers: {
                       ? {
                           ...t,
                           id: utils.nextAvailableId(
-                            [...store.states, ...processed],
+                            [...store.transitions, ...processed],
                             "t"
                           ),
                         }
@@ -391,6 +429,11 @@ const reducers: {
               ...brandNewTransitions,
             ];
           })(),
+
+          transitionInProgress: {
+            ...store.transitionInProgress,
+            ...action.transitionInProgress,
+          },
         }
       : store,
 
@@ -405,9 +448,13 @@ const reducers: {
     action.ids && action.ids.length > 0
       ? {
           ...store,
+          starting: action.ids.includes(store.starting) ? null : store.starting,
           states: store.states.filter((s) => !action.ids.includes(s.id)),
           transitions: store.transitions.filter(
-            (t) => !action.ids.includes(t.id)
+            (t) =>
+              !action.ids.includes(t.id) &&
+              !action.ids.includes(t.start?.state) &&
+              !action.ids.includes(t.end?.state)
           ),
         }
       : store,
@@ -536,6 +583,23 @@ const GraphProvider = ({
     [dispatch]
   );
 
+  const setStartState = useCallback(
+    (state: string | PartialExcept<State, "id">) =>
+      dispatch({
+        type: "MANIPULATE",
+        manipulation: (g) => ({
+          ...g,
+          starting:
+            state === null
+              ? null
+              : g.states?.find(
+                  (s) => s.id === (typeof state === "string" ? state : state.id)
+                )?.id,
+        }),
+      }),
+    [dispatch]
+  );
+
   const pkg = useMemo(
     () => ({
       dispatch,
@@ -544,8 +608,17 @@ const GraphProvider = ({
       deleteElement,
       setRoot,
       setSize,
+      setStartState,
     }),
-    [dispatch, modifyState, modifyTransition, deleteElement, setRoot, setSize]
+    [
+      dispatch,
+      modifyState,
+      modifyTransition,
+      deleteElement,
+      setRoot,
+      setSize,
+      setStartState,
+    ]
   );
 
   return (
@@ -595,6 +668,41 @@ const ref = <T,>(initialValue: T): MutableRefObject<T> =>
     };
   })();
 
+type TransitionInProgressSetter =
+  | Partial<TransitionInProgress>
+  | ((tip: TransitionInProgress) => TransitionInProgress);
+
+const useTransitionInProgress = (): TransitionInProgress => {
+  const graph = useGraph();
+  return useMemo(() => graph.transitionInProgress, [graph]);
+};
+
+/**
+ * @returns A setter function for the TransitionInProgress function of the graph
+ */
+const useSetTransitionInProgress = (): ((
+  setter: TransitionInProgressSetter
+) => void) => {
+  const { dispatch, graph } = useGraphAndGraphActions();
+  return (setter: TransitionInProgressSetter) =>
+    dispatch({
+      type: "ADD",
+      transitionInProgress:
+        typeof setter === "function"
+          ? setter(graph.transitionInProgress)
+          : { ...graph.transitionInProgress, ...setter },
+    });
+};
+
+const useTipState = (): [
+  TransitionInProgress,
+  (setter: TransitionInProgressSetter) => void
+] => {
+  const tip = useTransitionInProgress();
+  const setTip = useSetTransitionInProgress();
+  return useMemo(() => [tip, setTip], [tip, setTip]);
+};
+
 export {
   GraphActionsContext,
   GraphProvider,
@@ -603,21 +711,26 @@ export {
   ref,
   blankGraph,
   origin,
-  midPoint,
   computeLine,
   computeThirdPoint,
   pointIsAtEdgeOfCircle,
   useGraphAndGraphActions,
+  useTransitionInProgress,
+  useSetTransitionInProgress,
+  useTipState,
+  midPoint,
 };
 
 export type {
   State,
   Size,
   Transition,
+  TransitionInProgress,
   Graph,
   GraphAction,
   GraphActionsContextType,
   GraphActionType,
   Point,
+  PartialExcept,
   Offset,
 };

@@ -1,8 +1,10 @@
 import { DoubleLeftOutlined } from "@ant-design/icons";
-import { Button, Menu } from "antd";
+import { Button, Menu, Divider } from "antd";
 import React, { ComponentPropsWithoutRef, useCallback, useState } from "react";
 import styled from "styled-components";
-import theme from "../../util/styles";
+import { theme } from "../../util/styles";
+import { useDebuggerState } from "../data/debugger";
+import { RunInputsModal, useModalState } from "../runinputs/RunInputsModal";
 import placeHolderMenuItems from "./placeHolderMenuItems";
 
 const Root = styled.div``;
@@ -20,38 +22,46 @@ const ToggleIcon = styled(DoubleLeftOutlined)<{ $collapsed?: boolean }>`
   ${({ $collapsed }) => $collapsed && `transform: rotate(-90deg)`}
 `;
 
-const Toggle = ({
-  collapsed,
-  toggle,
-}: {
+type ToggleProps = {
   collapsed?: boolean;
   toggle?: () => void;
-} & ComponentPropsWithoutRef<"div">) => (
+} & ComponentPropsWithoutRef<"div">;
+
+const Toggle = ({ collapsed, toggle }: ToggleProps) => (
   <ToggleButton type="primary" onClick={toggle ?? (() => null)}>
     <ToggleIcon $collapsed={collapsed} />
   </ToggleButton>
 );
 
-type MenuBarProps = ComponentPropsWithoutRef<"div">;
+const useToggle = (initialValue = true): [boolean, () => void] => {
+  const [collapsed, setCollapsed] = useState(initialValue);
+  const toggle = useCallback(() => setCollapsed((s) => !s), [setCollapsed]);
+  return [collapsed, toggle];
+};
 
+const SmallDivider = () => <Divider style={{ margin: "0.1em" }} />;
+
+type MenuBarProps = ComponentPropsWithoutRef<"div">;
 const MenuBar = ({ ...props }: MenuBarProps): JSX.Element => {
-  const [state, setState] = useState({ collapsed: false });
-  const toggle = useCallback(
-    () => setState((s) => ({ ...s, collapsed: !s.collapsed })),
-    [setState]
-  );
+  const [collapsed, toggle] = useToggle();
+  const debugToggle = useDebuggerState()[2];
+  const modalControls = useModalState();
 
   return (
     <Root {...props}>
       <Menu
         mode="inline"
         theme="light"
-        inlineCollapsed={state.collapsed}
-        defaultSelectedKeys={["1"]}
-        defaultOpenKeys={["sub1"]}
+        inlineCollapsed={collapsed}
+        selectedKeys={[]}
       >
-        <Toggle collapsed={state.collapsed} toggle={toggle} />
-        {placeHolderMenuItems()}
+        <RunInputsModal {...modalControls} />
+        <Toggle collapsed={collapsed} toggle={toggle} />
+        <SmallDivider />
+        {placeHolderMenuItems({
+          openDebugger: debugToggle,
+          openRunInputMenu: modalControls.show,
+        })}
       </Menu>
     </Root>
   );

@@ -21,6 +21,7 @@ declare module "styled-components" {
     shadows: {
       sparse: string;
       medium: string;
+      dark: string;
       [key: string]: string;
     };
 

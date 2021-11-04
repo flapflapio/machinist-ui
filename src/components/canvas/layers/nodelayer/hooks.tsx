@@ -1,5 +1,4 @@
 import {
-  ComponentPropsWithoutRef,
   Dispatch,
   MouseEvent,
   SetStateAction,
@@ -9,32 +8,13 @@ import {
   useRef,
   useState,
 } from "react";
-import styled from "styled-components";
 import {
   Graph,
   GraphAction,
-  origin,
   Point,
   State as GraphState,
-  useGraphAndGraphActions,
-} from "../../data/graph";
-import { Labels } from "../labels/Labels";
-import { State, StateRoot } from "../node/State";
-
-const Root = styled.div`
-  width: 100%;
-  height: 100%;
-  position: absolute !important;
-  inset: 0 auto auto 0;
-  z-index: 10;
-  box-sizing: border-box;
-
-  & > ${StateRoot} {
-    position: absolute;
-  }
-`;
-
-type NodeLayerProps = ComponentPropsWithoutRef<"div">;
+} from "../../../data/graph";
+import { State } from "../../node/State";
 
 const useDragging = (
   graphOrSize: Graph | number
@@ -77,7 +57,7 @@ const useDragging = (
   );
 };
 
-const useAdjust = () =>
+const useAdjust = (): ((s: GraphState, p: Point) => void) =>
   useCallback((s: GraphState, p: Point) => {
     if (!s?.ref?.current) return;
     const coords = p;
@@ -98,7 +78,7 @@ const useMouseMove = ({
   dragging: boolean[];
   adjust: (s: GraphState, p: Point) => void;
   dispatch: Dispatch<GraphAction>;
-}) =>
+}): ((s: GraphState, i: number) => (e: MouseEvent<HTMLDivElement>) => void) =>
   useCallback(
     (s: GraphState, i: number) => (e: MouseEvent<HTMLDivElement>) => {
       if (!dragging[i]) return;
@@ -112,18 +92,26 @@ const useMouseMove = ({
 const usePassiveAdjust = (
   graph: Graph,
   adjust: (s: GraphState, p: Point) => void
-) =>
+): void =>
   useEffect(() => graph.states.forEach((s) => adjust(s, s.location)), [
     graph,
     adjust,
   ]);
 
-const useStateMapper = (onMouseDown: (s: GraphState, i: number) => void) =>
+const useStateMapper = (
+  onMouseDown: (s: GraphState, i: number) => void
+): ((s: GraphState, i: number) => JSX.Element) =>
   useCallback(
     (s: GraphState, i: number) => (
       <State
         key={s.id}
         id={s.id}
+
+        // We want the state to remain selected even after moving it. There is
+        // an onClick handler in the NodeLayer such that if you click once on
+        // the bare canvas, the currently selected node is deselected.
+        onClick={(e) => e.stopPropagation()}
+
         onMouseDown={() => onMouseDown(s, i)}
         style={{
           transform: `translate(
@@ -139,7 +127,7 @@ const useStateMapper = (onMouseDown: (s: GraphState, i: number) => void) =>
 const useMouseDown = (
   setStateAndIndex: Dispatch<SetStateAction<[GraphState, number]>>,
   startDragging: (i: number) => void
-) =>
+): ((s: GraphState, i: number) => void) =>
   useCallback(
     (s: GraphState, i: number) => {
       setStateAndIndex([s, i]);
@@ -149,7 +137,8 @@ const useMouseDown = (
   );
 
 const useDoubleClicker = <T,>(
-  callback: (e: MouseEvent<T>) => void,
+  onDouble: (e: MouseEvent<T>) => void,
+  onSingle: (e: MouseEvent<T>) => void = () => null,
   numberOfClicks = 2,
   timeout = 200
 ): ((e: MouseEvent<T>) => void) => {
@@ -157,68 +146,26 @@ const useDoubleClicker = <T,>(
   return useCallback(
     (e: MouseEvent<T>) => {
       count.current += 1;
-      if (count.current >= numberOfClicks) callback(e);
+      if (count.current >= numberOfClicks) {
+        onDouble(e);
+      } else {
+        onSingle(e);
+      }
       setTimeout(() => {
         count.current = 0;
       }, timeout);
     },
-    [count, callback, numberOfClicks, timeout]
+    [count, onDouble, onSingle, numberOfClicks, timeout]
   );
 };
 
-const NodeLayer = ({ ...props }: NodeLayerProps): JSX.Element => {
-  const { graph, dispatch } = useGraphAndGraphActions();
-  const { dragging, startDragging, stopDragging } = useDragging(graph);
-  const adjust = useAdjust();
-  const mouseMove = useMouseMove({ graph, dispatch, dragging, adjust });
-  const [stateAndIndex, setStateAndIndex] = useState<[GraphState, number]>([
-    null,
-    -1,
-  ]);
-  const onMouseDown = useMouseDown(setStateAndIndex, startDragging);
-  const stateAndIndexToElement = useStateMapper(onMouseDown);
-  const onMouseMove = useCallback(
-    (e: MouseEvent<HTMLDivElement>) => {
-      if (
-        stateAndIndex[0] &&
-        stateAndIndex[1] >= 0 &&
-        stateAndIndex[1] < dragging.length
-      ) {
-        mouseMove(...stateAndIndex)(e);
-      }
-    },
-    [stateAndIndex, mouseMove, dragging]
-  );
-
-  const doubleClick = useDoubleClicker(
-    useCallback(
-      (e: MouseEvent<HTMLDivElement>) =>
-        dispatch({
-          type: "ADD",
-          state: {
-            id: "q_",
-            ending: false,
-            location: graph.eventToSvgCoords(e),
-            ref: null,
-          },
-        }),
-      [dispatch, graph]
-    )
-  );
-
-  usePassiveAdjust(graph, adjust);
-
-  return (
-    <Root
-      {...props}
-      onClick={doubleClick}
-      onMouseUp={stopDragging}
-      onMouseMove={onMouseMove}
-    >
-      <Labels />
-      {graph.states.map(stateAndIndexToElement)}
-    </Root>
-  );
+export {
+  useAdjust,
+  useCallback,
+  useDoubleClicker,
+  useDragging,
+  usePassiveAdjust,
+  useMouseDown,
+  useMouseMove,
+  useStateMapper,
 };
-
-export default NodeLayer;

@@ -1,10 +1,13 @@
+import Draggable from "react-draggable";
 import styled from "styled-components";
 import Canvas from "./canvas/Canvas";
+import { FloatingNodeMenu } from "./canvas/node/nodemenu/FloatingNodeMenu";
+import { DebuggerContextProvider } from "./data/debugger";
 import { GraphProvider } from "./data/graph";
 import { KeyChordsProvider } from "./data/keychords";
+import { SelectedNodeProvider } from "./data/selectedstate";
+import GraphStoreDebugger from "./debug/GraphStoreDebugger";
 import MenuBar from "./menubar/MenuBar";
-
-// const canvasBackgroundColor = "#F6F8FA";
 
 const Main = styled.main`
   height: 100vh;
@@ -22,14 +25,25 @@ const FloatingMenuBar = styled(MenuBar)`
   z-index: 100;
 `;
 
+const MenuBarWithDebugger = () => (
+  <DebuggerContextProvider>
+    <FloatingMenuBar />
+    <Draggable allowAnyClick>
+      <GraphStoreDebugger />
+    </Draggable>
+  </DebuggerContextProvider>
+);
+
 const App = (): JSX.Element => (
   <KeyChordsProvider>
     <GraphProvider>
-      <Main>
-        <FullscreenCanvas />
-        <FloatingMenuBar />
-        {/* <GraphStoreDebugger /> */}
-      </Main>
+      <SelectedNodeProvider>
+        <Main>
+          <FullscreenCanvas />
+          <MenuBarWithDebugger />
+          <FloatingNodeMenu />
+        </Main>
+      </SelectedNodeProvider>
     </GraphProvider>
   </KeyChordsProvider>
 );

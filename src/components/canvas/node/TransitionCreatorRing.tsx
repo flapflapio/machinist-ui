@@ -1,10 +1,13 @@
-import { MouseEvent, useRef, useState } from "react";
+import { ComponentPropsWithoutRef, MouseEvent, useRef, useState } from "react";
 import styled, { css } from "styled-components";
 import {
   computeLine,
   computeThirdPoint,
+  origin,
   pointIsAtEdgeOfCircle,
+  useGraphAndGraphActions,
 } from "../../data/graph";
+import { useSelectedNode } from "../../data/selectedstate";
 
 const Root = styled.div`
   transition: all 500ms cubic-bezier(0.75, 0, 0.25, 1);
@@ -20,7 +23,7 @@ const Root = styled.div`
   z-index: 49;
 `;
 
-const Ball = styled.div<{ $active?: boolean; $x?: number; $y?: number }>`
+const Ball = styled.div<{ $active?: boolean }>`
   box-sizing: border-box;
   transition: background-color 200ms cubic-bezier(0.19, 1, 0.22, 1);
   height: 1em;
@@ -38,11 +41,21 @@ const Ball = styled.div<{ $active?: boolean; $x?: number; $y?: number }>`
     `}
 `;
 
-const TransitionCreatorRing = ({ ...props } = {}): JSX.Element => {
+type TransitionCreatorRingProps = {
+  id: string;
+  scalingFactor?: number;
+} & ComponentPropsWithoutRef<"div">;
+
+const TransitionCreatorRing = ({
+  id,
+  scalingFactor = 0.7,
+  ...props
+}: TransitionCreatorRingProps): JSX.Element => {
   const [hovering, setHovering] = useState(false);
-  const [ballPos, setBallPos] = useState({ $x: 0, $y: 0 });
   const root = useRef<HTMLDivElement>(null);
   const ball = useRef<HTMLDivElement>(null);
+  const { dispatch } = useGraphAndGraphActions();
+  const { setState: setSelected } = useSelectedNode();
 
   const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
     if (!root.current || !ball.current) return;
@@ -51,15 +64,16 @@ const TransitionCreatorRing = ({ ...props } = {}): JSX.Element => {
     const centerPoint = { x: rect.left + radius, y: rect.top + radius };
     const mousePoint = { x: e.clientX, y: e.clientY };
 
-    setHovering(pointIsAtEdgeOfCircle(centerPoint, mousePoint, radius, 0.7));
+    setHovering(
+      pointIsAtEdgeOfCircle(centerPoint, mousePoint, radius, scalingFactor)
+    );
 
     const line = computeLine(centerPoint, mousePoint);
     const pointThree = computeThirdPoint(radius, line, centerPoint, mousePoint);
-    const scalingFactor = 0.9;
 
     ball.current.style.transform = `translate(
-      ${scalingFactor * (pointThree.x - centerPoint.x)}px,
-      ${scalingFactor * (pointThree.y - centerPoint.y)}px
+      ${(scalingFactor + 0.2) * (pointThree.x - centerPoint.x)}px,
+      ${(scalingFactor + 0.2) * (pointThree.y - centerPoint.y)}px
     )`;
   };
 
@@ -71,6 +85,21 @@ const TransitionCreatorRing = ({ ...props } = {}): JSX.Element => {
     setHovering(false);
   };
 
+  const onBallMouseDown = (e: MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation(); // Stop clicks from reaching the NodeLayer
+
+    setSelected({ id });
+    dispatch({
+      type: "ADD",
+      transitionInProgress: {
+        active: true,
+        end: { x: e.clientX, y: e.clientY },
+        start: { state: id, offset: origin() },
+      },
+    });
+  };
+
   return (
     <Root
       {...props}
@@ -79,7 +108,7 @@ const TransitionCreatorRing = ({ ...props } = {}): JSX.Element => {
       onMouseMove={handleMouseMove}
       ref={root}
     >
-      <Ball ref={ball} $active={hovering} {...ballPos} />
+      <Ball ref={ball} onMouseDown={onBallMouseDown} $active={hovering} />
     </Root>
   );
 };
