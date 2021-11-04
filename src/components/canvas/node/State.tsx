@@ -61,6 +61,8 @@ const StateRoot = styled.div<{ theme?: DefaultTheme }>`
     , transform 0ms linear;
     /* !!! DEBUG !!! */
 
+  background: white;
+
   position: relative;
   display: flex;
   flex-direction: column;

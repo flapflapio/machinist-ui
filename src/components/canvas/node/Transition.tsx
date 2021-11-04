@@ -86,5 +86,5 @@ const Transition = memo(
 Transition.displayName = "Transition";
 
 export default Transition;
-export { svgNs };
+export { svgNs, Line };
 export type { TransitionProps };
