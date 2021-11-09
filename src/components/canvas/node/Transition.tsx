@@ -7,6 +7,7 @@ import {
   Transition as GraphTransition,
   useGraphActions,
   computeLine,
+  midPoint,
 } from "../../data/graph";
 
 const svgNs = "http://www.w3.org/2000/svg";
@@ -51,11 +52,6 @@ const Transition = memo(
         point: s.point,
         scalingFactor,
       });
-
-    const midPoint = (p1: Point, p2: Point): Point => ({
-      x: Math.min(p2.x, p1.x) + Math.abs(p2.x - p1.x) / 2,
-      y: Math.min(p2.y, p1.y) + Math.abs(p2.y - p1.y) / 2,
-    });
 
     const startState = graph.pointForState(transition.start.state);
     const endState = graph.pointForState(transition.end.state);

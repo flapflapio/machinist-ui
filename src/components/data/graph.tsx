@@ -120,6 +120,11 @@ type GraphActionsContextType = {
 
 const origin = (): Point => ({ x: 0, y: 0 });
 
+const midPoint = (p1: Point, p2: Point): Point => ({
+  x: Math.min(p2.x, p1.x) + Math.abs(p2.x - p1.x) / 2,
+  y: Math.min(p2.y, p1.y) + Math.abs(p2.y - p1.y) / 2,
+});
+
 const computeLine = (p1: Point, p2: Point): { a: number; b: number } => {
   const a = (p2.y - p1.y) / (p2.x - p1.x);
   const b = p1.y - a * p1.x;
@@ -598,6 +603,7 @@ export {
   ref,
   blankGraph,
   origin,
+  midPoint,
   computeLine,
   computeThirdPoint,
   pointIsAtEdgeOfCircle,

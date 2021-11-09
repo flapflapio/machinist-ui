@@ -18,6 +18,7 @@ import {
   State as GraphState,
   useGraphAndGraphActions,
 } from "../../data/graph";
+import { Labels } from "../labels/Labels";
 import { State, StateRoot } from "../node/State";
 
 const Root = styled.div`
@@ -214,6 +215,7 @@ const NodeLayer = ({ ...props }: NodeLayerProps): JSX.Element => {
       onMouseUp={stopDragging}
       onMouseMove={onMouseMove}
     >
+      <Labels />
       {graph.states.map(stateAndIndexToElement)}
     </Root>
   );

@@ -126,4 +126,4 @@ const State = memo(
 
 State.displayName = "State";
 
-export { State, StateRoot };
+export { State, StateRoot, Text };
