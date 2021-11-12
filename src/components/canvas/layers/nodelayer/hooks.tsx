@@ -13,6 +13,7 @@ import {
   GraphAction,
   Point,
   State as GraphState,
+  useGraphSize,
 } from "../../../data/graph";
 import { State } from "../../node/State";
 
@@ -78,16 +79,46 @@ const useMouseMove = ({
   dragging: boolean[];
   adjust: (s: GraphState, p: Point) => void;
   dispatch: Dispatch<GraphAction>;
-}): ((s: GraphState, i: number) => (e: MouseEvent<HTMLDivElement>) => void) =>
-  useCallback(
+}): ((s: GraphState, i: number) => (e: MouseEvent<HTMLDivElement>) => void) => {
+  const [size, setSize] = useGraphSize();
+
+  const adjustSize = useCallback(
+    (coords: Point) => {
+      // const { innerHeight, innerWidth } = window;
+      const { height, width } = size;
+
+      // Within 50 px of the window edge we need to adjust
+      const tolerance = 50;
+
+      // Adjust only if node is being dragged close to the edge of the screen
+      if (
+        !(
+          coords.x < tolerance ||
+          coords.y < tolerance ||
+          coords.x > width - tolerance ||
+          coords.y > height - tolerance
+        )
+      ) {
+        return; // Node not close to the edge
+      }
+
+      // Node close to the edge, needs adjustment
+      setSize((s) => ({ width: s.width + 50, height: s.height + 50 }));
+    },
+    [size, setSize]
+  );
+
+  return useCallback(
     (s: GraphState, i: number) => (e: MouseEvent<HTMLDivElement>) => {
       if (!dragging[i]) return;
       const coords = graph.eventToSvgCoords(e);
       adjust(s, coords);
+      adjustSize(coords);
       dispatch({ type: "ADD", state: { ...s, location: coords } });
     },
-    [dragging, graph, adjust, dispatch]
+    [dragging, graph, adjust, dispatch, adjustSize]
   );
+};
 
 const usePassiveAdjust = (
   graph: Graph,
@@ -106,12 +137,10 @@ const useStateMapper = (
       <State
         key={s.id}
         id={s.id}
-
         // We want the state to remain selected even after moving it. There is
         // an onClick handler in the NodeLayer such that if you click once on
         // the bare canvas, the currently selected node is deselected.
         onClick={(e) => e.stopPropagation()}
-
         onMouseDown={() => onMouseDown(s, i)}
         style={{
           transform: `translate(

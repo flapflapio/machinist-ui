@@ -27,7 +27,7 @@ const FullscreenCanvas = styled(Canvas)`
 `;
 
 const FloatingMenuBar = styled(MenuBar)`
-  position: absolute;
+  position: fixed;
   inset: 30% auto auto 1rem;
   z-index: 100;
 `;

@@ -33,12 +33,12 @@ const Lines = ({
   useEffect(() => {
     const adjust = () =>
       setSize({
-        width: window.innerWidth * 1.2,
-        height: window.innerHeight * 1.2,
+        width: window.innerWidth * 1,
+        height: window.innerHeight * 1,
       });
     adjust();
-    window.addEventListener("resize", adjust);
-    return () => window.removeEventListener("resize", adjust);
+    // window.addEventListener("resize", adjust);
+    // return () => window.removeEventListener("resize", adjust);
   }, []);
 
   // VERTICAL LINES
