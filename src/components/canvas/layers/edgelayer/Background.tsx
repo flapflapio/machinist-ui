@@ -3,9 +3,9 @@ import {
   useCallback,
   useEffect,
   useMemo,
-  useState,
 } from "react";
 import styled from "styled-components";
+import { useGraphSize } from "../../../data/graph";
 import { Line } from "../../node/Transition";
 
 const BackgroundLine = styled(Line)`
@@ -27,10 +27,15 @@ const Lines = ({
   vSpacing?: number;
   hSpacing?: number;
 }) => {
-  const [size, setSize] = useState({ w: 1920, h: 1080 });
+  const [size, setSize] = useGraphSize();
+
+  // const [size, setSize] = useState({ w: 1920, h: 1080 });
   useEffect(() => {
     const adjust = () =>
-      setSize({ w: window.innerWidth, h: window.innerHeight });
+      setSize({
+        width: window.innerWidth * 1.2,
+        height: window.innerHeight * 1.2,
+      });
     adjust();
     window.addEventListener("resize", adjust);
     return () => window.removeEventListener("resize", adjust);
@@ -39,12 +44,12 @@ const Lines = ({
   // VERTICAL LINES
   const vertical = useMemo(
     () =>
-      Object.keys([...Array(Math.round(size.w / hSpacing))]).map((_, i) => {
+      Object.keys([...Array(Math.round(size.width / hSpacing))]).map((_, i) => {
         const x = (i + 1) * hSpacing - hSpacing / 2;
         return {
           x1: `${x}px`,
           x2: `${x}px`,
-          y1: "0%",
+          y1: "0px",
           y2: "100%",
         };
       }),
@@ -54,15 +59,17 @@ const Lines = ({
   // HORIZONTAL LINES
   const horizontal = useMemo(
     () =>
-      Object.keys([...Array(Math.round(size.h / vSpacing))]).map((_, i) => {
-        const y = (i + 1) * vSpacing - vSpacing / 2;
-        return {
-          y1: `${y}px`,
-          y2: `${y}px`,
-          x1: "0%",
-          x2: "100%",
-        };
-      }),
+      Object.keys([...Array(Math.round(size.height / vSpacing))]).map(
+        (_, i) => {
+          const y = (i + 1) * vSpacing - vSpacing / 2;
+          return {
+            y1: `${y}px`,
+            y2: `${y}px`,
+            x1: "0%",
+            x2: "100%",
+          };
+        }
+      ),
     [size, vSpacing]
   );
 

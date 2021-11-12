@@ -4,6 +4,7 @@ import {
   MouseEvent,
   MutableRefObject,
   ReactNode,
+  SetStateAction,
   useCallback,
   useContext,
   useMemo,
@@ -30,8 +31,6 @@ type Offset = Point;
  * @see https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/viewBox
  */
 type Size = {
-  minX: number;
-  minY: number;
   width: number;
   height: number;
 };
@@ -85,7 +84,6 @@ type Graph = {
   transitionInProgress: TransitionInProgress;
 
   // METHODS
-  vb: () => string;
   pointForState: (id: string) => Point;
   clientCoordsToSvgCoords: (p: Point) => Point;
   svgCoordsToClientCoords: (p: Point) => Point;
@@ -128,7 +126,7 @@ type GraphAction = {
 
 type GraphActionsContextType = {
   dispatch: Dispatch<GraphAction>;
-  setSize: (size: Size) => void;
+  setSize: (size: Size | ((s: Size) => Size)) => void;
   setRoot: (root: MutableRefObject<SVGSVGElement>) => void;
   deleteElement: (id: string) => void;
   modifyState: (partialState: PartialExcept<State, "id">) => void;
@@ -193,7 +191,7 @@ const pointIsAtEdgeOfCircle = (
   scalingFactor * radius;
 
 const blankGraph = (): Graph => ({
-  size: { minX: 0, minY: 0, height: 200, width: 200 },
+  size: { height: 200, width: 200 },
 
   root: null,
   starting: null,
@@ -205,15 +203,6 @@ const blankGraph = (): Graph => ({
     end: origin(),
     ref: null,
     start: null,
-  },
-
-  vb() {
-    return (
-      `${this?.size?.minX} ` +
-      `${this?.size?.minY} ` +
-      `${this?.size?.width} ` +
-      `${this?.size?.height}`
-    );
   },
 
   clientCoordsToSvgCoords({ x, y }) {
@@ -338,10 +327,7 @@ const utils = {
 
 const sizeEqualsSize = (size1: Size, size2: Size): boolean =>
   size1 === size2 ||
-  (size1?.width === size2?.width &&
-    size2?.height === size1?.height &&
-    size2?.minX === size1?.minX &&
-    size2?.minY === size1?.minY);
+  (size1?.width === size2?.width && size2?.height === size1?.height);
 
 /**
  * Some reducers for handling each case in {@link GraphActionType}
@@ -578,8 +564,8 @@ const GraphProvider = ({
     [dispatch]
   );
 
-  const setSize = useCallback(
-    (size: Size) => dispatch({ type: "SET_SIZE", size }),
+  const setSize = useCallback<Dispatch<SetStateAction<Size>>>(
+    (size) => dispatch({ type: "SET_SIZE", size }),
     [dispatch]
   );
 
@@ -698,6 +684,14 @@ const useTipState = (): [
   return useMemo(() => [tip, setTip], [tip, setTip]);
 };
 
+const useGraphSize = (): [Size, Dispatch<SetStateAction<Size>>] => {
+  const {
+    graph: { size },
+    setSize,
+  } = useGraph();
+  return useMemo(() => [size, setSize], [size, setSize]);
+};
+
 export {
   GraphActionsContext,
   GraphProvider,
@@ -711,6 +705,7 @@ export {
   useTransitionInProgress,
   useSetTransitionInProgress,
   useTipState,
+  useGraphSize,
   midPoint,
 };
 

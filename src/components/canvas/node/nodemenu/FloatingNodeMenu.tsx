@@ -5,10 +5,11 @@ import { NodeMenu, NodeMenuProps } from "./NodeMenu";
 import { State } from "../../../data/graph";
 
 const NodeMenuRoot = styled.section`
-  position: absolute;
+  position: fixed;
   inset: 100% auto auto 100%;
-  transform: translate(-115%, -115%);
+  transform: translate(calc(-100% - 1.5rem), calc(-100% - 1.5rem));
   z-index: 999;
+  max-height: 30em;
 `;
 
 const FloatingNodeMenu = (props: Omit<NodeMenuProps, "node">): JSX.Element => {

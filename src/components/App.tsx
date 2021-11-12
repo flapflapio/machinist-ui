@@ -3,7 +3,7 @@ import styled from "styled-components";
 import Canvas from "./canvas/Canvas";
 import { FloatingNodeMenu } from "./canvas/node/nodemenu/FloatingNodeMenu";
 import { DebuggerContextProvider } from "./data/debugger";
-import { GraphProvider } from "./data/graph";
+import { GraphProvider, useGraphSize } from "./data/graph";
 import { KeyChordsProvider } from "./data/keychords";
 import { SelectedNodeProvider } from "./data/selectedstate";
 import GraphStoreDebugger from "./debug/GraphStoreDebugger";
@@ -13,6 +13,13 @@ const Main = styled.main`
   height: 100vh;
   width: 100vw;
 `;
+
+const BigCanvas = () => {
+  const [size] = useGraphSize();
+  return (
+    <Canvas style={{ height: `${size.height}px`, width: `${size.width}px` }} />
+  );
+};
 
 const FullscreenCanvas = styled(Canvas)`
   width: 100%;
@@ -39,7 +46,8 @@ const App = (): JSX.Element => (
     <GraphProvider>
       <SelectedNodeProvider>
         <Main>
-          <FullscreenCanvas />
+          <BigCanvas />
+          {/* <FullscreenCanvas /> */}
           <MenuBarWithDebugger />
           <FloatingNodeMenu />
         </Main>
