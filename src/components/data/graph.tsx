@@ -628,16 +628,11 @@ const GraphProvider = ({
   );
 };
 
-const useGraph = (): Graph => useContext(GraphContext);
-
-const useGraphActions = (): GraphActionsContextType =>
-  useContext(GraphActionsContext);
-
-const useGraphAndGraphActions = (): {
+const useGraph = (): {
   graph: Graph;
 } & GraphActionsContextType => {
-  const graph = useGraph();
-  const graphActions = useGraphActions();
+  const graph = useContext(GraphContext);
+  const graphActions = useContext(GraphActionsContext);
   return useMemo(() => ({ graph, ...graphActions }), [graph, graphActions]);
 };
 
@@ -673,7 +668,7 @@ type TransitionInProgressSetter =
   | ((tip: TransitionInProgress) => TransitionInProgress);
 
 const useTransitionInProgress = (): TransitionInProgress => {
-  const graph = useGraph();
+  const { graph } = useGraph();
   return useMemo(() => graph.transitionInProgress, [graph]);
 };
 
@@ -683,7 +678,7 @@ const useTransitionInProgress = (): TransitionInProgress => {
 const useSetTransitionInProgress = (): ((
   setter: TransitionInProgressSetter
 ) => void) => {
-  const { dispatch, graph } = useGraphAndGraphActions();
+  const { dispatch, graph } = useGraph();
   return (setter: TransitionInProgressSetter) =>
     dispatch({
       type: "ADD",
@@ -706,15 +701,13 @@ const useTipState = (): [
 export {
   GraphActionsContext,
   GraphProvider,
-  useGraph,
-  useGraphActions,
   ref,
   blankGraph,
   origin,
   computeLine,
   computeThirdPoint,
   pointIsAtEdgeOfCircle,
-  useGraphAndGraphActions,
+  useGraph,
   useTransitionInProgress,
   useSetTransitionInProgress,
   useTipState,

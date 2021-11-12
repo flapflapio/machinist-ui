@@ -15,7 +15,7 @@ import {
   Point,
   Transition as GraphTransition,
   TransitionInProgress as GraphTransitionInProgress,
-  useGraphActions,
+  useGraph,
 } from "../../data/graph";
 
 const svgNs = "http://www.w3.org/2000/svg";
@@ -150,7 +150,7 @@ const TransitionInProgress = memo(
     ...props
   }: TransitionInProgressProps): JSX.Element => {
     const me = useRef<SVGLineElement>(null);
-    const { dispatch } = useGraphActions();
+    const { dispatch } = useGraph();
 
     useEffect(
       () =>
@@ -220,7 +220,7 @@ const Arrow = (): JSX.Element => (
 const Transition = memo(
   ({ id, transition, graph, ...props }: TransitionProps): JSX.Element => {
     const me = useRef<SVGLineElement>(null);
-    const { modifyTransition } = useGraphActions();
+    const { modifyTransition } = useGraph();
 
     useEffect(() => {
       modifyTransition({ id, ref: me });

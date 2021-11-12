@@ -8,7 +8,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import { PartialExcept, State, useGraphAndGraphActions } from "./graph";
+import { PartialExcept, State, useGraph } from "./graph";
 
 type SelectedNodeContextType = {
   state: State;
@@ -54,7 +54,7 @@ const SelectedNodeProvider = ({
     index: -1,
   });
 
-  const { graph } = useGraphAndGraphActions();
+  const { graph } = useGraph();
   const node = useMemo(() => graph.states.find((s) => s.id === state) ?? null, [
     graph,
     state,

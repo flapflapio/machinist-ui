@@ -1,6 +1,6 @@
 import { ComponentPropsWithoutRef, MouseEvent, useCallback } from "react";
 import styled from "styled-components";
-import { useGraphAndGraphActions } from "../../../data/graph";
+import { useGraph } from "../../../data/graph";
 import {
   useListOfSelectedNodeState,
   useSelectedNode,
@@ -33,7 +33,7 @@ const Root = styled.div`
 type NodeLayerProps = ComponentPropsWithoutRef<"div">;
 
 const NodeLayer = ({ ...props }: NodeLayerProps): JSX.Element => {
-  const { graph, dispatch } = useGraphAndGraphActions();
+  const { graph, dispatch } = useGraph();
   const { dragging, startDragging, stopDragging } = useDragging(graph);
   const adjust = useAdjust();
   const mouseMove = useMouseMove({ graph, dispatch, dragging, adjust });

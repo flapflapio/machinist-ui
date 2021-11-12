@@ -15,7 +15,7 @@ import {
 } from "react";
 import styled from "styled-components";
 import { simulate } from "../../service";
-import { useGraphAndGraphActions } from "../data/graph";
+import { useGraph } from "../data/graph";
 
 const useModalState = (): {
   visible: boolean;
@@ -49,7 +49,7 @@ type TapeEntryProps = ComponentPropsWithoutRef<"div"> & {
   setMsg: (text: string) => void;
 };
 const TapeEntry = ({ setMsg, ...props }: TapeEntryProps) => {
-  const { graph } = useGraphAndGraphActions();
+  const { graph } = useGraph();
   const [loading, setLoading] = useState(false);
   const [tape, setTape] = useState("");
   const [success, setSuccess] = useState<boolean>(null);

@@ -5,7 +5,7 @@ import {
   computeThirdPoint,
   origin,
   pointIsAtEdgeOfCircle,
-  useGraphAndGraphActions,
+  useGraph,
 } from "../../data/graph";
 import { useSelectedNode } from "../../data/selectedstate";
 
@@ -54,7 +54,7 @@ const TransitionCreatorRing = ({
   const [hovering, setHovering] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const ball = useRef<HTMLDivElement>(null);
-  const { dispatch } = useGraphAndGraphActions();
+  const { dispatch } = useGraph();
   const { setState: setSelected } = useSelectedNode();
 
   const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {

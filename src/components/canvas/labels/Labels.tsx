@@ -36,7 +36,7 @@ const Label = ({
 );
 
 const Labels = (): JSX.Element => {
-  const graph = useGraph();
+  const { graph } = useGraph();
 
   // The transitions store start and end states by state id, we need to search
   // the graph to find the locations for each state

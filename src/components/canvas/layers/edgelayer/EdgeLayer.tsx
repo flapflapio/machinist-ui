@@ -1,14 +1,7 @@
-import {
-  ComponentPropsWithoutRef,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-} from "react";
+import { ComponentPropsWithoutRef, useEffect, useMemo, useRef } from "react";
 import styled, { DefaultTheme, StyledComponent } from "styled-components";
-import { useGraph, useGraphActions, useTipState } from "../../../data/graph";
-import { useSelectedNode } from "../../../data/selectedstate";
-import { Transition, TransitionInProgress, svgNs } from "../../node/Transition";
+import { useGraph, useTipState } from "../../../data/graph";
+import { svgNs, Transition, TransitionInProgress } from "../../node/Transition";
 import { Background } from "./Background";
 
 const Root: StyledComponent<"svg", DefaultTheme> = styled.svg.attrs(
@@ -28,30 +21,32 @@ const Root: StyledComponent<"svg", DefaultTheme> = styled.svg.attrs(
 `;
 
 const Transitions = () => {
-  const graph = useGraph();
+  const { graph } = useGraph();
   return (
     <>
       {graph.transitions.map((t, i) => (
-        <Transition key={`${t.id}-i`} id={t.id} transition={t} graph={graph} />
+        <Transition
+          key={`${t.id}-${i}`}
+          id={t.id}
+          transition={t}
+          graph={graph}
+        />
       ))}
     </>
   );
 };
 
 const TransInProg = () => {
-  const graph = useGraph();
+  const { graph } = useGraph();
   const [tip] = useTipState();
 
-  if (!tip.active) {
-    return <></>;
-  }
-
+  if (!tip.active) return <></>;
   return <TransitionInProgress transitionInProgress={tip} graph={graph} />;
 };
 
 type EdgeLayerProps = ComponentPropsWithoutRef<"svg">;
 const EdgeLayer = ({ ...props }: EdgeLayerProps): JSX.Element => {
-  const { setRoot } = useGraphActions();
+  const { setRoot } = useGraph();
   const root = useRef<SVGSVGElement>(null);
   const viewBox = useMemo(() => "0 0 100% 100%", []);
 

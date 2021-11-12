@@ -10,7 +10,7 @@ import {
 } from "react";
 import styled, { css, DefaultTheme } from "styled-components";
 import { theme } from "../../../util/styles";
-import { useGraphAndGraphActions } from "../../data/graph";
+import { useGraph } from "../../data/graph";
 import { useSelectedNode } from "../../data/selectedstate";
 import { useNewTransitionCallback } from "./hooks";
 import { Arrow } from "./Transition";
@@ -157,7 +157,7 @@ const State = memo(
       ...props
     }: StateProps = { id: "q0" }
   ): JSX.Element => {
-    const { modifyState, dispatch, graph } = useGraphAndGraphActions();
+    const { modifyState, dispatch, graph } = useGraph();
     const me = useRef<HTMLDivElement>(null);
     const moved = useRef(false);
     const createNewTransition = useNewTransitionCallback(id, graph, dispatch);

@@ -159,10 +159,11 @@ const GraphStoreDebugger = (): JSX.Element => {
     [selectedNodeStore]
   );
 
-  const graph = useGraph();
+  const { graph } = useGraph();
   const stringifiableGraphStore = useMemo(
     () => ({
       root: refToTagName(graph.root),
+      size: graph.size,
       starting: graph.starting,
       transitionInProgress: withRefAsTagName(graph.transitionInProgress),
       states: graph.states.map(withRefAsTagName),

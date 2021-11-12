@@ -10,7 +10,7 @@ import styled, { css } from "styled-components";
 import { theme } from "../../../../util/styles";
 import {
   State as GraphState,
-  useGraphAndGraphActions,
+  useGraph,
 } from "../../../data/graph";
 import { State } from "../State";
 
@@ -116,7 +116,7 @@ const EditableTransition = ({
   from: string;
   to: string;
 }): JSX.Element => {
-  const { graph, dispatch } = useGraphAndGraphActions();
+  const { graph, dispatch } = useGraph();
   const current = useMemo(() => graph.transitions.find((t) => t.id === id), [
     graph,
     id,
@@ -167,7 +167,7 @@ const NodeMenu = ({ node, ...props }: NodeMenuProps): JSX.Element => {
     deleteElement,
     modifyState,
     setStartState,
-  } = useGraphAndGraphActions();
+  } = useGraph();
 
   const state = useMemo(
     () =>

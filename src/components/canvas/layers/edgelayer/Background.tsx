@@ -85,6 +85,7 @@ const Lines = ({
     </g>
   );
 };
+
 const Background = styled(Lines)`
   width: 100%;
   height: 100%;
