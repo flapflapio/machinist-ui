@@ -79,6 +79,7 @@ typings/
 .next
 out/
 build/
+.env*.local
 
 # Nuxt.js build / generate output
 .nuxt
