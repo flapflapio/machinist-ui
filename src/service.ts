@@ -2,8 +2,14 @@
  * This package encapsulates all API calls made from the web app
  */
 import { Graph } from "./components/data/graph";
+import { api } from "./util/utils";
 
-const backend = "http://localhost:8080";
+// Routes for all the different APIs
+const apis = {
+  simulate(tape: string): string {
+    return api(`/simulate?tape=${tape}`);
+  },
+};
 
 type PreppedMachine = {
   Type: string;
@@ -55,8 +61,8 @@ const simulate = async (
   tape: string
 ): Promise<SimulationResponse> => {
   const mach = isPreppedMachine(machine) ? machine : prepareMachine(machine);
-  console.log(JSON.stringify({ a: 1, b: mach }));
-  const posted = await fetch(`${backend}/simulate?tape=${tape}`, {
+  // console.log(JSON.stringify({ a: 1, b: mach }));
+  const posted = await fetch(apis.simulate(tape), {
     method: "POST",
     headers: {
       Accept: "application/json",

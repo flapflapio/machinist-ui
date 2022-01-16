@@ -3,7 +3,11 @@
 
 import { CSSProperties } from "react";
 
-const assetPrefix = process.env.ASSET_PREFIX || "";
+const assetPrefix = process.env.NEXT_PUBLIC_ASSET_PREFIX || "";
+
+const apiPrefix = process.env.NEXT_PUBLIC_API || "http://localhost:8080";
+
+const api = (path = "/"): string => `${apiPrefix}${path}`;
 
 const urlFor = (path = "/"): string => `${assetPrefix}${path}`;
 
@@ -50,4 +54,4 @@ const style = (
   return s;
 };
 
-export { assetPrefix, redirect, style, urlFor };
+export { assetPrefix, apiPrefix, api, redirect, style, urlFor };
