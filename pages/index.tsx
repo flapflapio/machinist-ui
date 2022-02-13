@@ -1,5 +1,1 @@
-import App from "../src/components/App";
-
-const Home = (): JSX.Element => <App />;
-
-export default Home;
+export { default } from "../src/components/App";
