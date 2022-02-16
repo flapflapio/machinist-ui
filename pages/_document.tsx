@@ -1,4 +1,3 @@
-// import { ServerStyleSheets as ServerStyleSheetsMUI } from "@material-ui/core";
 import Document, {
   DocumentContext,
   Head,
@@ -6,56 +5,54 @@ import Document, {
   Main,
   NextScript,
 } from "next/document";
-import { Children, ReactChild, ReactFragment, ReactPortal } from "react";
-import { ServerStyleSheet as ServerStyleSheetsSC } from "styled-components";
+import { ServerStyleSheet } from "styled-components";
 
 /**
  * This `_document.js` includes some code for fixing the "className did not
- * match" bug that happens with Next.js SSR with styled-components and MUI.
+ * match" bug that happens with Next.js SSR with styled-components.
  */
 export default class MyDocument extends Document {
-  static async getInitialProps(
-    ctx: DocumentContext
-  ): Promise<{
-    styled: (ReactChild | ReactFragment | ReactPortal)[];
+  static async getInitialProps(ctx: DocumentContext): Promise<{
     styles: JSX.Element;
     html: string;
     head?: JSX.Element[];
   }> {
-    // const sheetMUI = new ServerStyleSheetsMUI();
-    const sheetSC = new ServerStyleSheetsSC();
+    const sheet = new ServerStyleSheet();
     const originalRenderPage = ctx.renderPage;
 
     try {
       ctx.renderPage = () =>
         originalRenderPage({
           enhanceApp: (App) => (props) =>
-            sheetSC.collectStyles(<App {...props} />),
+            sheet.collectStyles(<App {...props} />),
         });
 
       const initialProps = await Document.getInitialProps(ctx);
       return {
         ...initialProps,
-        styled: [
-          ...Children.toArray(initialProps.styles),
-          // sheetMUI.getStyleElement(),
-        ],
         styles: (
           <>
             {initialProps.styles}
-            {sheetSC.getStyleElement()}
+            {sheet.getStyleElement()}
           </>
         ),
       };
     } finally {
-      sheetSC.seal();
+      sheet.seal();
     }
   }
 
   render(): JSX.Element {
     return (
       <Html>
-        <Head />
+        {/* prettier-ignore */}
+        <Head>
+          {/* <link rel="icon"       href={`${assetPrefix}/favicon.ico`} /> */}
+          <link rel="icon" href="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/160/twitter/31/baby-chick_1f424.png" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" />
+          <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=B612:wght@700&display=swap" />
+          <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@300&display=swap" />
+        </Head>
         <body>
           <Main />
           <NextScript />
