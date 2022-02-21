@@ -1,8 +1,7 @@
 import { Button, Form, Input } from "antd";
 import styled, { keyframes } from "styled-components";
 import logo from "../../../public/images/flapflap1.png";
-// import background from '../../../public/images/flapflap.svg';
-import { GoogleOutlined, GithubFilled } from "@ant-design/icons";
+import { GoogleOutlined, GithubFilled, SendOutlined } from "@ant-design/icons";
 import "animate.css";
 
 const gradient = keyframes`
@@ -11,8 +10,6 @@ const gradient = keyframes`
     100% { background-position: 0% 50%;}
   `;
 
-// #1cabdf
-// #ccd81d
 const Container = styled.div`
   /* background setup */
   background: linear-gradient(-45deg, #1cabdf, #f14a8a, #ffff00);
@@ -33,37 +30,17 @@ const Container = styled.div`
   box-sizing: border-box;
 `;
 
-// container for signup page trial
-// const Container = styled.div`
-//   /* background setup */
-//   background-image: url(${background.src});
-//   background-size: cover;
-//   background-position: center;
-//   background-attachment: fixed;
-//   /* border:  5px solid black; */
-//   flex-direction: column;
-//   position: fixed;
-//   display: flex;
-//   top: 0;
-//   left: 0;
-//   width: 100vw;
-//   height: 100vh;
-//   place-items: center;
-//   place-content: center;
-//   box-sizing: border-box;
-//   `;
-
 const SmallBox = styled.div`
-    width: 37em;
-    grid-column: 2;
-    grid-row: 2;
-    display: grid;
-    grid-gap: 10px;
-    margin: auto 0;
-    padding: 20px;
-    background-color: #fffcf1;
-    border-radius: 50px;
-    box-shadow: 0 32px 64px rgba(0,0,0,0.2);
+  width: 37em;
+  grid-column: 2;
+  grid-row: 2;
+  display: grid;
+  grid-gap: 10px;
+  margin: auto 0;
+  padding: 20px;
+  background-color: #fffcf1;
+  border-radius: 50px;
+  box-shadow: 0 32px 64px rgba(0, 0, 0, 0.2);
 `;
 const Logo = styled.div`
   background-image: url(${logo.src});
@@ -157,15 +134,21 @@ function Login() {
               <Button type="primary" shape="round" size="large">
                 Create an acccount
               </Button>
+              &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+              <Button type="primary" shape="round" size="large">
+                Sign Up
+              </Button>
             </Form.Item>
           </Form>
         </Filedset>
 
         <Button type="primary" color="red" shape="round" size="large">
-          <GoogleOutlined />
+          Google login <GoogleOutlined />
+          <SendOutlined />
         </Button>
         <Button type="primary" color="red" shape="round" size="large">
-          <GithubFilled />
+          GitHub login <GithubFilled />
+          <SendOutlined />
         </Button>
       </SmallBox>
     </Container>

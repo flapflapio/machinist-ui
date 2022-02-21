@@ -1,16 +1,10 @@
-import { GoogleOutlined } from "@ant-design/icons";
+import { GoogleOutlined, GithubFilled, SendOutlined } from "@ant-design/icons";
 import { Button, Checkbox, Col, Form, Input, Row, Select } from "antd";
 import "antd/dist/antd.css";
-import React, { useState } from "react";
-import styled, { keyframes } from "styled-components";
+import React from "react";
+import styled from "styled-components";
 import background from "../../../public/images/flapflap.svg";
 import logo from "../../../public/images/flapflap1.png";
-
-// const gradient = keyframes`
-//     0% { background-position: 0% 50%; }
-//     50% { background-position: 100% 50%; }
-//     100% { background-position: 0% 50%;}
-/* `; */
 
 // container for signup page trial
 const Container = styled.div`
@@ -60,41 +54,14 @@ const Filedset = styled.div`
   border-radius: 10px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 `;
+const CenterLink = styled.div`
+  margin: auto;
+  width: 40%;
+  padding: 0px;
+`;
+
 const { Option } = Select;
-const residences = [
-  {
-    value: "zhejiang",
-    label: "Zhejiang",
-    children: [
-      {
-        value: "hangzhou",
-        label: "Hangzhou",
-        children: [
-          {
-            value: "xihu",
-            label: "West Lake",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    value: "jiangsu",
-    label: "Jiangsu",
-    children: [
-      {
-        value: "nanjing",
-        label: "Nanjing",
-        children: [
-          {
-            value: "zhonghuamen",
-            label: "Zhong Hua Men",
-          },
-        ],
-      },
-    ],
-  },
-];
+
 const formItemLayout = {
   labelCol: {
     xs: {
@@ -126,83 +93,34 @@ const tailFormItemLayout = {
   },
 };
 
-const Signup = () => {
+function Signup() {
   const [form] = Form.useForm();
 
   const onFinish = (values) => {
     console.log("Received values of form: ", values);
   };
-
-  const prefixSelector = (
-    <Form.Item name="prefix" noStyle>
-      <Select
-        style={{
-          width: 70,
-        }}
-      >
-        <Option value="86">+86</Option>
-        <Option value="87">+87</Option>
-      </Select>
-    </Form.Item>
-  );
-
-  const suffixSelector = (
-    <Form.Item name="suffix" noStyle>
-      <Select
-        style={{
-          width: 70,
-        }}
-      >
-        <Option value="USD">$</Option>
-        <Option value="CNY">¥</Option>
-      </Select>
-    </Form.Item>
-  );
-  const [autoCompleteResult, setAutoCompleteResult] = useState([]);
-
-  const onWebsiteChange = (value) => {
-    if (!value) {
-      setAutoCompleteResult([]);
-    } else {
-      setAutoCompleteResult(
-        [".com", ".org", ".net"].map((domain) => `${value}${domain}`)
-      );
-    }
-  };
-
-  const websiteOptions = autoCompleteResult.map((website) => ({
-    label: website,
-    value: website,
-  }));
-
-  // #1cabdf
-  // #ccd81d
-
   return (
     <Container>
       <SmallBox>
         <Logo> </Logo>
         <Filedset>
-          <legend>Sign Up</legend>
+          <legend>Sign Up </legend>
+
           <Form
             {...formItemLayout}
             form={form}
             name="register"
             onFinish={onFinish}
-            initialValues={{
-              residence: ["zhejiang", "hangzhou", "xihu"],
-              prefix: "86",
-            }}
             scrollToFirstError
           >
             <Form.Item
-              name="nickname"
-              label="Nickname"
-              tooltip="What do you want others to call you?"
+              name="username"
+              label="Username"
+              tooltip="What do want your login pseudoname to be?"
               rules={[
                 {
                   required: true,
-                  message: "Please input your nickname!",
+                  message: "Please input your username!",
                   whitespace: true,
                 },
               ]}
@@ -328,6 +246,7 @@ const Signup = () => {
               </Checkbox>
             </Form.Item>
             <Form.Item {...tailFormItemLayout}>
+              &emsp;&emsp;
               <Button
                 type="primary"
                 htmlType="submit"
@@ -339,8 +258,21 @@ const Signup = () => {
             </Form.Item>
           </Form>
         </Filedset>
+        <Button type="primary" color="red" shape="round" size="large">
+          Google sign up <GoogleOutlined />
+          <SendOutlined />
+        </Button>
+        <Button type="primary" color="red" shape="round" size="large">
+          GitHub sign up <GithubFilled />
+          <SendOutlined />
+        </Button>
+        <CenterLink>
+          <p>
+            <a href="/">Already have an account?</a>
+          </p>
+        </CenterLink>
       </SmallBox>
     </Container>
   );
-};
+}
 export default Signup;
