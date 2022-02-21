@@ -8,7 +8,6 @@ import { KeyChordsProvider } from "./data/keychords";
 import { SelectedNodeProvider } from "./data/selectedstate";
 import GraphStoreDebugger from "./debug/GraphStoreDebugger";
 import MenuBar from "./menubar/MenuBar";
-import Login from "./auth/login";
 
 const Main = styled.main`
   height: 100vh;
