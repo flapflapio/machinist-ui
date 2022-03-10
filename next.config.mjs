@@ -1,8 +1,7 @@
-module.exports = {
-  future: {
-    webpack5: true,
-  },
-
+/**
+ * @type {import('next').NextConfig}
+ */
+const nextConfig = {
   // Use below if you need to serve assets from somewhere else
   // basePath: process.env.NODE_ENV === "production" ? "" : "",
   // assetPrefix: process.env.NODE_ENV === "production" ? "" : "",
@@ -11,4 +10,9 @@ module.exports = {
 
   // Use below to configure webpack
   webpack: (config) => config,
+  // experimental: {
+  //   styledComponents: true,
+  // },
 };
+
+export default nextConfig;
