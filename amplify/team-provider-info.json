@@ -1,0 +1,20 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-machinistui-dev-182933-authRole",
+      "UnauthRoleArn": "arn:aws:iam::081940731328:role/amplify-machinistui-dev-182933-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::081940731328:role/amplify-machinistui-dev-182933-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-machinistui-dev-182933-deployment",
+      "UnauthRoleName": "amplify-machinistui-dev-182933-unauthRole",
+      "StackName": "amplify-machinistui-dev-182933",
+      "StackId": "arn:aws:cloudformation:us-east-1:081940731328:stack/amplify-machinistui-dev-182933/f2e187a0-a0c9-11ec-a8e0-0af4d4178c6b",
+      "AmplifyAppId": "d1qsed9ggxv5f5"
+    },
+    "categories": {
+      "auth": {
+        "machinistuic37dc572": {}
+      }
+    }
+  }
+}
