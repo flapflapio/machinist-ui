@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        node-version: ["^15"]
+        node-version: ["^16"]
     steps:
       - uses: actions/checkout@v2
       - name: Use Node.js ${{ matrix.node-version }}
@@ -32,6 +32,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: |
+          echo 'export default {};' >> src/aws-exports.js  # Dummy file
           yarn install --dev
           yarn test
-          yarn deploy
+          # yarn deploy

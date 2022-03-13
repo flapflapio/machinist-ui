@@ -26,5 +26,12 @@
         ]
       }
     }
+  },
+  "storage": {
+    "machinistuis3": {
+      "service": "S3",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": []
+    }
   }
 }

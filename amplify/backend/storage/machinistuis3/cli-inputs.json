@@ -1,0 +1,14 @@
+{
+  "resourceName": "machinistuis3",
+  "policyUUID": "380f6660",
+  "bucketName": "machinistui-storage",
+  "storageAccess": "auth",
+  "guestAccess": [],
+  "authAccess": [
+    "CREATE_AND_UPDATE",
+    "READ",
+    "DELETE"
+  ],
+  "triggerFunction": "NONE",
+  "groupAccess": {}
+}
