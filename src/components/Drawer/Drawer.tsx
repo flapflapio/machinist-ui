@@ -26,7 +26,7 @@ const BigAvatar = styled(Avatar)`
 
 const Drawer = () => {
   const [visible, setVisible] = useState(false);
-  const [size, setSize] = useState<string>();
+  const [size, setSize] = useState<"default" | "large">("default");
 
   const showDefaultDrawer = () => {
     setSize("default");
@@ -59,14 +59,14 @@ const Drawer = () => {
           <Avatar
             size="large"
             src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
-            // onClick={showDefaultDrawer}
+            //onClick={showDefaultDrawer}
           />
         </div>
       </Space>
       <Drawerant
         title={`User accounts`}
         placement="right"
-        //size={size}
+        size={size}
         onClose={onClose}
         visible={visible}
         extra={
