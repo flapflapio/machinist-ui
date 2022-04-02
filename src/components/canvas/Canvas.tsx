@@ -4,8 +4,6 @@ import { EdgeLayer } from "./layers/edgelayer";
 import { NodeLayer } from "./layers/nodelayer";
 
 const Root = styled.div`
-  width: 500px;
-  height: 300px;
   position: relative;
 `;
 

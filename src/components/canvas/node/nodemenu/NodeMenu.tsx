@@ -1,22 +1,57 @@
-import { Button, Checkbox, Divider, Input } from "antd";
+import { Checkbox, Divider } from "antd";
 import { CheckboxChangeEvent } from "antd/lib/checkbox";
-import {
-  ChangeEvent,
-  ComponentPropsWithoutRef,
-  useCallback,
-  useMemo,
-} from "react";
-import styled, { css } from "styled-components";
+import React, { ComponentPropsWithoutRef, useCallback, useMemo } from "react";
+import styled from "styled-components";
 import { theme } from "../../../../util/styles";
 import {
+  Graph,
+  PartialExcept,
   State as GraphState,
   useGraph,
 } from "../../../data/graph";
-import { State } from "../State";
+import DeleteButton from "./DeleteButton";
+import Heading from "./Heading";
+import NodeStage from "./NodeStage";
+import SubMenu from "./SubMenu";
+import TransitionMenu from "./TransitionMenu";
+
+const useToggleEndState = (
+  modifyState: (partialState: PartialExcept<GraphState, "id">) => void,
+  state: GraphState
+) =>
+  useCallback(
+    (e: CheckboxChangeEvent) =>
+      modifyState({ id: state?.id, ending: e.target.checked }),
+    [modifyState, state]
+  );
+
+const useToggleStartState = (
+  state: GraphState,
+  graph: Graph,
+  setStartState: (state: string | PartialExcept<GraphState, "id">) => void
+) =>
+  useCallback(
+    (e: CheckboxChangeEvent) => {
+      const weAreTheStartState = state && graph.starting === state.id;
+      const checked = e.target.checked;
+      if (
+        (!weAreTheStartState && checked) ||
+        (weAreTheStartState && !checked)
+      ) {
+        setStartState(!weAreTheStartState && checked ? state : null);
+      }
+    },
+    [state, graph, setStartState]
+  );
+
+const fast = (...attrs: string[]) =>
+  `${attrs
+    .map((attr) => `${attr} 0.5s cubic-bezier(0.19, 1, 0.22, 1)`)
+    .reduce((acc, next) => `${acc}, ${next}`)};`;
 
 const borderColour = "rgba(128, 128, 128, 0.466)";
 const NodeMenuRoot = styled.div`
-  transition: opacity 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+  transition: ${fast("opacity", "height")};
 
   display: flex;
   flex-direction: column;
@@ -35,139 +70,12 @@ const NodeMenuRoot = styled.div`
   }
 `;
 
-const NodeStage = ({
-  state,
-  activeOverride,
-  ...props
-}: {
-  state: GraphState;
-  activeOverride?: boolean;
-} & ComponentPropsWithoutRef<"div">) => (
-  <div {...props}>
-    {state && (
-      <State
-        activeOverride={activeOverride}
-        style={{ transform: "none !important" }}
-        id={state.id}
-      />
-    )}
-  </div>
-);
-
-const StyledNodeStage = styled(NodeStage)`
-  ${theme.mixins.unselectable()}
-
-  display: flex;
-  place-content: center;
-  place-items: center;
-  width: 100%;
-  padding: 0.75em;
-
-  & > .state {
-    transform: none !important;
-  }
-`;
-
-const SubMenu = styled.div.attrs<{ $center?: boolean }>(({ $center }) => ({
-  $center: $center ?? true,
-}))<{ $center?: boolean }>`
-  display: flex;
-  flex-direction: column;
-  margin-top: 0.5em;
-  width: 100%;
-  padding: 0 1em;
-
-  ${({ $center }) =>
-    $center &&
-    css`
-      place-content: center;
-      place-items: center;
-    `}
-
-  &&& > * {
-    margin: 0.3em 0.2em;
-  }
-`;
-
-const DeleteButton = styled(Button).attrs({
-  children: "Delete",
-  type: "primary",
-  danger: true,
-})`
-  width: fit-content;
-`;
-
-const EditableTransitionRoot = styled.div`
-  display: flex;
-
-  & input {
-    margin-left: 0.5em;
-    width: 65%;
-  }
-`;
-
-const EditableTransition = ({
-  id,
-  from,
-  to,
-  ...props
-}: ComponentPropsWithoutRef<"div"> & {
-  id: string;
-  from: string;
-  to: string;
-}): JSX.Element => {
-  const { graph, dispatch } = useGraph();
-  const current = useMemo(() => graph.transitions.find((t) => t.id === id), [
-    graph,
-    id,
-  ]);
-
-  const editTransition = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) =>
-      dispatch({
-        type: "ADD",
-        transition: {
-          ...current,
-          symbol: e.target.value,
-        },
-      }),
-    [dispatch, current]
-  );
-
-  return (
-    <EditableTransitionRoot {...props}>
-      <span>
-        {from} → {to}
-      </span>
-      <Input
-        size="small"
-        onChange={editTransition}
-        placeholder="Symbol"
-        value={current.symbol}
-      />
-    </EditableTransitionRoot>
-  );
-};
-
-const Heading = styled.h3`
-  &&& {
-    transform: translate(-1em);
-    font-style: italic;
-    color: rgba(128, 128, 128, 0.719);
-  }
-`;
-
 type NodeMenuProps = ComponentPropsWithoutRef<"div"> & {
   node: string | GraphState;
 };
 
 const NodeMenu = ({ node, ...props }: NodeMenuProps): JSX.Element => {
-  const {
-    graph,
-    deleteElement,
-    modifyState,
-    setStartState,
-  } = useGraph();
+  const { graph, deleteElement, modifyState, setStartState } = useGraph();
 
   const state = useMemo(
     () =>
@@ -187,45 +95,12 @@ const NodeMenu = ({ node, ...props }: NodeMenuProps): JSX.Element => {
     state,
   ]);
 
-  const toggleEndState = useCallback(
-    (e: CheckboxChangeEvent) =>
-      modifyState({ id: state?.id, ending: e.target.checked }),
-    [modifyState, state]
-  );
-
-  const toggleStartState = useCallback(
-    (e: CheckboxChangeEvent) => {
-      const weAreTheStartState = state && graph.starting === state.id;
-      const checked = e.target.checked;
-      if (
-        (!weAreTheStartState && checked) ||
-        (weAreTheStartState && !checked)
-      ) {
-        setStartState(!weAreTheStartState && checked ? state : null);
-      }
-    },
-    [state, graph, setStartState]
-  );
-
-  const transitionMenu = useMemo(
-    () =>
-      graph.transitions
-        .filter(
-          (t) =>
-            state && (t.start.state === state.id || t.end.state === state.id)
-        )
-        .map((t) => ({
-          id: t.id,
-          from: t.start.state,
-          to: t.end.state,
-        }))
-        .map((p, i) => <EditableTransition key={`${p.id}_${i}`} {...p} />),
-    [graph, state]
-  );
+  const toggleEndState = useToggleEndState(modifyState, state);
+  const toggleStartState = useToggleStartState(state, graph, setStartState);
 
   return (
     <NodeMenuRoot {...props}>
-      <StyledNodeStage activeOverride={active} state={state} />
+      <NodeStage activeOverride={active} state={state} />
       <Divider />
       <SubMenu>
         <DeleteButton onClick={deleteNode} />
@@ -240,13 +115,7 @@ const NodeMenu = ({ node, ...props }: NodeMenuProps): JSX.Element => {
         </SubMenu>
         <SubMenu $center={false} style={{ marginBottom: "1.1em" }}>
           <Heading>Transitions</Heading>
-          {transitionMenu.length > 0 ? (
-            transitionMenu
-          ) : (
-            <Heading style={{ fontSize: "1.5em", transform: "translate(35%)" }}>
-              N/A
-            </Heading>
-          )}
+          <TransitionMenu graph={graph} state={state} />
         </SubMenu>
       </SubMenu>
     </NodeMenuRoot>

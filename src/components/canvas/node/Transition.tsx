@@ -22,6 +22,7 @@ const svgNs = "http://www.w3.org/2000/svg";
 
 const Line: StyledComponent<"line", DefaultTheme> = styled.line.attrs(() => ({
   xmlns: svgNs,
+  style: { fill: "yellow" },
 }))``;
 
 type TransitionProps = ComponentPropsWithoutRef<"line"> & {
@@ -125,7 +126,8 @@ const ArrowTransition: FC<
       <g>
         <Line
           ref={ref}
-          stroke="black"
+          stroke="#0390fc"
+          strokeWidth={5}
           x1={`${start.x}`}
           y1={`${start.y}`}
           x2={`${end.x}`}
