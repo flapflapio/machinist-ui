@@ -16,5 +16,23 @@
         "machinistuic37dc572": {}
       }
     }
+  },
+  "flap": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-machinistui-flap-133246-authRole",
+      "UnauthRoleArn": "arn:aws:iam::246495707898:role/amplify-machinistui-flap-133246-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::246495707898:role/amplify-machinistui-flap-133246-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-machinistui-flap-133246-deployment",
+      "UnauthRoleName": "amplify-machinistui-flap-133246-unauthRole",
+      "StackName": "amplify-machinistui-flap-133246",
+      "StackId": "arn:aws:cloudformation:us-east-1:246495707898:stack/amplify-machinistui-flap-133246/eade89c0-b2aa-11ec-9a57-1220424cf98f",
+      "AmplifyAppId": "d3mxroer1uu5sv"
+    },
+    "categories": {
+      "auth": {
+        "machinistuic37dc572": {}
+      }
+    }
   }
 }
