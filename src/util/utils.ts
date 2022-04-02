@@ -54,4 +54,15 @@ const style = (
   return s;
 };
 
-export { assetPrefix, apiPrefix, api, redirect, style, urlFor };
+const prettySize = (sizeInBytes: number): string => {
+  const gb = 1 << 30;
+  const mb = 1 << 20;
+  const kb = 1 << 10;
+  if (sizeInBytes < 0) return sizeInBytes.toString();
+  if (sizeInBytes > gb) return `${sizeInBytes / gb} GB`;
+  if (sizeInBytes > mb) return `${sizeInBytes / mb} MB`;
+  if (sizeInBytes > kb) return `${sizeInBytes / kb} KB`;
+  return `${sizeInBytes} bytes`;
+};
+
+export { assetPrefix, apiPrefix, api, redirect, style, urlFor, prettySize };

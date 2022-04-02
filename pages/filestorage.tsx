@@ -1,6 +1,4 @@
-import FileStorage from "../src/components/fileStorage/Filestorage";
-
-
+import FileStorage from "../src/components/fileStorage/FileStorage";
 
 
 function Account() {
