@@ -1,4 +1,5 @@
 import { Avatar, AvatarProps } from "antd";
+import styled from "styled-components";
 import { PROFILE_PIC, useAvatarLetter, useEmail, useProfilePic } from "./hook";
 
 const defaultProfilePic =
@@ -20,5 +21,10 @@ const Me = ({ ...props }: MeProps): JSX.Element => {
   );
 };
 
+const BigMe = styled(Me)`
+  transform: scale(5);
+  margin: 5rem;
+`;
+
 export type { MeProps };
-export { defaultProfilePic, Me, useProfilePic, useEmail, PROFILE_PIC };
+export { defaultProfilePic, BigMe, Me, useProfilePic, useEmail, PROFILE_PIC };

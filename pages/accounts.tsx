@@ -1,4 +1,4 @@
-import Drawerant from "../src/components/Drawer/Drawer";
+import AccountDrawer from "../src/components/accounts/AccountDrawer";
 
 function Account() {
   return (
@@ -6,7 +6,7 @@ function Account() {
       <div className="myClass">
         <br />
         <div>
-          <Drawerant />
+          <AccountDrawer />
         </div>
       </div>
     </div>

@@ -1,26 +1,27 @@
-import { SettingOutlined } from "@ant-design/icons";
 import { Menu } from "antd";
 import { ComponentPropsWithoutRef } from "react";
 import styled from "styled-components";
-import { Me } from "../Drawer/Avatar";
+import AccountDrawer from "../accounts/AccountDrawer";
+import { Me } from "../accounts/Avatar";
 
-const TopBarRoot = styled.div`
-  & svg {
-    transform: scale(1.5);
-  }
-`;
+const TopBarRoot = styled.div``;
+
+const AccountManagement = () => {
+  return (
+    <>
+      <AccountDrawer />
+      <Me />
+    </>
+  );
+};
 
 type TopBarProps = ComponentPropsWithoutRef<"div">;
-
 const TopBar = ({ ...props }: TopBarProps) => {
   return (
     <TopBarRoot {...props}>
       <Menu mode="horizontal" selectedKeys={[]}>
         <Menu.Item>
-          <SettingOutlined />
-        </Menu.Item>
-        <Menu.Item>
-          <Me />
+          <AccountManagement />
         </Menu.Item>
       </Menu>
     </TopBarRoot>

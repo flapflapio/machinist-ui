@@ -1,8 +1,9 @@
 import { SettingOutlined } from "@ant-design/icons";
-import { Avatar, Button, Drawer as Drawerant, Form, Input, Space } from "antd";
-import { useState } from "react";
+import { Button, Drawer, Form, Input, Space } from "antd";
+import { stat } from "fs";
+import { useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
-import { Me } from "./Avatar";
+import { BigMe, Me } from "./Avatar";
 
 const FormRoot = styled.div`
   display: flex;
@@ -12,32 +13,54 @@ const FormRoot = styled.div`
   height: 100%;
 `;
 
-const BigAvatar = styled(Avatar)`
-  width: 10em;
-  height: 10em;
-`;
+type FormValues = {};
 
-const Drawer = () => {
-  const [visible, setVisible] = useState(false);
-  const [size, setSize] = useState<"default" | "large">("default");
+/**
+ * State management hook for all the drawer state.
+ */
+const useAccountDrawerState = () => {
+  const [state, setState] = useState<{
+    visible: boolean;
+  }>({
+    visible: false,
+  });
 
-  const showDefaultDrawer = () => {
-    setSize("default");
-    setVisible(true);
-  };
+  const visible = useMemo(() => state.visible, [state.visible]);
 
-  const onClose = () => {
-    setVisible(false);
-  };
+  const show = useCallback(
+    () => setState((s) => ({ ...s, visible: true })),
+    [setState]
+  );
 
-  const onFinish = (values) => {
-    console.log("Success:", values);
-  };
+  const hide = useCallback(
+    () => setState((s) => ({ ...s, visible: false })),
+    [setState]
+  );
 
-  const onFinishFailed = (errorInfo) => {
-    console.log("Failed:", errorInfo);
-  };
+  const submit = useCallback((values: FormValues) => {
+    console.log(`Success: ${values}`);
+  }, []);
 
+  const submitFailed = useCallback((errorInfo) => {
+    console.log(`Failed: ${errorInfo}`);
+  }, []);
+
+  return useMemo(
+    () => ({
+      submitFailed,
+      show,
+      hide,
+      state,
+      visible,
+      setState,
+      submit,
+    }),
+    [show, hide, state, setState, visible, submit, submitFailed]
+  );
+};
+
+const AccountDrawer = () => {
+  const { show, hide, visible, submit, submitFailed } = useAccountDrawerState();
   return (
     <>
       <Space>
@@ -46,17 +69,17 @@ const Drawer = () => {
           shape="circle"
           icon={<SettingOutlined />}
           size={"large"}
-          onClick={showDefaultDrawer}
+          onClick={show}
         ></Button>
-        <div onClick={showDefaultDrawer}>
+        <div onClick={show}>
           <Me />
         </div>
       </Space>
-      <Drawerant
+      <Drawer
         title={`User accounts`}
         placement="right"
-        size={size}
-        onClose={onClose}
+        size="default"
+        onClose={hide}
         visible={visible}
         extra={
           <Space>
@@ -66,15 +89,16 @@ const Drawer = () => {
       >
         <div></div>
         <FormRoot>
-          <Me />
+          {/* <Me /> */}
+          <BigMe />
           <Form
             name="basic"
             labelCol={{ span: 8 }}
             wrapperCol={{ span: 16 }}
             initialValues={{ remember: true }}
             autoComplete="off"
-            onFinish={onFinish}
-            onFinishFailed={onFinishFailed}
+            onFinish={submit}
+            onFinishFailed={submitFailed}
           >
             <Form.Item
               label="Username"
@@ -118,9 +142,10 @@ const Drawer = () => {
             Sign out
           </Button>
         </FormRoot>
-      </Drawerant>
+      </Drawer>
     </>
   );
 };
 
-export default Drawer;
+export default AccountDrawer;
+export { AccountDrawer };
