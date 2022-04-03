@@ -2,7 +2,7 @@ import { SettingOutlined } from "@ant-design/icons";
 import { Menu } from "antd";
 import { ComponentPropsWithoutRef } from "react";
 import styled from "styled-components";
-import { defaultAvatar } from "../Drawer/Avatar";
+import { Me } from "../Drawer/Avatar";
 
 const TopBarRoot = styled.div`
   & svg {
@@ -19,7 +19,9 @@ const TopBar = ({ ...props }: TopBarProps) => {
         <Menu.Item>
           <SettingOutlined />
         </Menu.Item>
-        <Menu.Item>{defaultAvatar}</Menu.Item>
+        <Menu.Item>
+          <Me />
+        </Menu.Item>
       </Menu>
     </TopBarRoot>
   );

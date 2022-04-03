@@ -1,17 +1,8 @@
-import { useEffect, useState } from "react";
-import {
-  Drawer as Drawerant,
-  Button,
-  Space,
-  Form,
-  Input,
-  Checkbox,
-} from "antd";
-import { DownloadOutlined, SettingOutlined } from "@ant-design/icons";
-import { Avatar } from "antd";
+import { SettingOutlined } from "@ant-design/icons";
+import { Avatar, Button, Drawer as Drawerant, Form, Input, Space } from "antd";
+import { useState } from "react";
 import styled from "styled-components";
-import { DefaultAvatar, defaultAvatar, defaultProfilePic } from "./Avatar";
-import { Storage } from "aws-amplify";
+import { Me } from "./Avatar";
 
 const FormRoot = styled.div`
   display: flex;
@@ -47,17 +38,6 @@ const Drawer = () => {
     console.log("Failed:", errorInfo);
   };
 
-  const [pic, setPic] = useState("");
-
-  useEffect(() => {
-    Storage.get("profile.png", { download: true })
-      .then((data) => setPic(URL.createObjectURL(data.Body as Blob)))
-      .catch((err) => {
-        setPic(defaultProfilePic);
-        throw err;
-      });
-  });
-
   return (
     <>
       <Space>
@@ -69,7 +49,7 @@ const Drawer = () => {
           onClick={showDefaultDrawer}
         ></Button>
         <div onClick={showDefaultDrawer}>
-          <DefaultAvatar src={pic} />
+          <Me />
         </div>
       </Space>
       <Drawerant
@@ -78,11 +58,15 @@ const Drawer = () => {
         size={size}
         onClose={onClose}
         visible={visible}
-        extra={<Space>{<DefaultAvatar src={pic} />}</Space>}
+        extra={
+          <Space>
+            <Me />
+          </Space>
+        }
       >
         <div></div>
         <FormRoot>
-          <BigAvatar size="large" src={pic} />
+          <Me />
           <Form
             name="basic"
             labelCol={{ span: 8 }}
