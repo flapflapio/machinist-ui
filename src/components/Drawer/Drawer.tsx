@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Drawer as Drawerant,
   Button,
@@ -10,6 +10,8 @@ import {
 import { DownloadOutlined, SettingOutlined } from "@ant-design/icons";
 import { Avatar } from "antd";
 import styled from "styled-components";
+import { DefaultAvatar, defaultAvatar, defaultProfilePic } from "./Avatar";
+import { Storage } from "aws-amplify";
 
 const FormRoot = styled.div`
   display: flex;
@@ -45,6 +47,17 @@ const Drawer = () => {
     console.log("Failed:", errorInfo);
   };
 
+  const [pic, setPic] = useState("");
+
+  useEffect(() => {
+    Storage.get("profile.png", { download: true })
+      .then((data) => setPic(URL.createObjectURL(data.Body as Blob)))
+      .catch((err) => {
+        setPic(defaultProfilePic);
+        throw err;
+      });
+  });
+
   return (
     <>
       <Space>
@@ -56,11 +69,7 @@ const Drawer = () => {
           onClick={showDefaultDrawer}
         ></Button>
         <div onClick={showDefaultDrawer}>
-          <Avatar
-            size="large"
-            src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
-            //onClick={showDefaultDrawer}
-          />
+          <DefaultAvatar src={pic} />
         </div>
       </Space>
       <Drawerant
@@ -69,21 +78,11 @@ const Drawer = () => {
         size={size}
         onClose={onClose}
         visible={visible}
-        extra={
-          <Space>
-            <Avatar
-              size="large"
-              src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
-            />
-          </Space>
-        }
+        extra={<Space>{<DefaultAvatar src={pic} />}</Space>}
       >
         <div></div>
         <FormRoot>
-          <BigAvatar
-            size="large"
-            src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
-          />
+          <BigAvatar size="large" src={pic} />
           <Form
             name="basic"
             labelCol={{ span: 8 }}

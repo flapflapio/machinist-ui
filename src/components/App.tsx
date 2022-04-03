@@ -8,6 +8,7 @@ import { KeyChordsProvider } from "./data/keychords";
 import { SelectedNodeProvider } from "./data/selectedstate";
 import GraphStoreDebugger from "./debug/GraphStoreDebugger";
 import MenuBar from "./menubar/MenuBar";
+import TopBar from "./menubar/TopBar";
 
 const Main = styled.main`
   height: 100vh;
@@ -22,6 +23,12 @@ const FullscreenCanvas = styled(Canvas)`
 const FloatingMenuBar = styled(MenuBar)`
   position: absolute;
   inset: 30% auto auto 1rem;
+  z-index: 100;
+`;
+
+const FloatingTopBar = styled(TopBar)`
+  position: absolute;
+  inset: 1rem 2rem auto auto;
   z-index: 100;
 `;
 
@@ -42,6 +49,7 @@ const App = (): JSX.Element => (
           <FullscreenCanvas />
           <MenuBarWithDebugger />
           <FloatingNodeMenu />
+          <FloatingTopBar />
         </Main>
       </SelectedNodeProvider>
     </GraphProvider>
