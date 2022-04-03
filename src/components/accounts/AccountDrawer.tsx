@@ -1,4 +1,5 @@
 import { Button, Drawer, Form, Input, Space } from "antd";
+import { Auth } from "aws-amplify";
 import { useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
 import { BigMe, Me } from "./Avatar";
@@ -43,7 +44,7 @@ const useAccountDrawerState = () => {
     console.log(`Failed: ${errorInfo}`);
   }, []);
 
-  const signOut = useCallback(() => {}, []);
+  const signOut = useCallback(() => Auth.signOut().catch(console.log), []);
 
   return useMemo(
     () => ({
