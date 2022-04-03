@@ -10,6 +10,7 @@ import {
 
 type Profile = {
   pic?: File;
+  email?: string;
 };
 
 type ProfileContextType = {

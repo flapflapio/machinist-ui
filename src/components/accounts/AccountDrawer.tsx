@@ -3,6 +3,7 @@ import { Auth } from "aws-amplify";
 import { useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
 import BigMe from "./BigMe";
+import { useEmail } from "./hook";
 import { Me } from "./Me";
 
 const FormRoot = styled.div`
@@ -13,7 +14,9 @@ const FormRoot = styled.div`
   height: 100%;
 `;
 
-type FormValues = {};
+type FormValues = {
+  email?: string;
+};
 
 /**
  * State management hook for all the drawer state.
@@ -66,6 +69,11 @@ const AccountDrawer = () => {
   const { show, hide, visible, submit, submitFailed, signOut } =
     useAccountDrawerState();
 
+  const email = useEmail();
+  const prev = useMemo<FormValues>(() => ({ email }), [email]);
+  const [current, setCurrent] = useState<FormValues>(prev);
+  const changed = useMemo(() => current.email !== prev.email, [current, prev]);
+
   return (
     <>
       <Space>
@@ -97,35 +105,46 @@ const AccountDrawer = () => {
             onFinishFailed={submitFailed}
           >
             <Form.Item
-              label="Username"
-              name="username"
-              rules={[
-                { required: true, message: "Please input your username!" },
-              ]}
-            >
-              <Input />
-            </Form.Item>
-            <Form.Item
-              label="email"
+              label="Email"
               name="email"
-              rules={[{ required: true, message: "Please input your email!" }]}
+              rules={[{ required: false, message: "Please input your email!" }]}
             >
-              <Input />
+              <Input
+                value={current?.email ?? ""}
+                onChange={(e) =>
+                  setCurrent((c) => ({ ...c, email: e.target.value }))
+                }
+              />
             </Form.Item>
             <Form.Item
               label="Password"
               name="password"
               rules={[
-                { required: true, message: "Please input your password!" },
+                { required: false, message: "Please input your password!" },
               ]}
             >
               <Input.Password />
             </Form.Item>
-
             <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-              <Button type="primary" htmlType="submit">
-                Modify
-              </Button>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  width: "10em",
+                }}
+              >
+                <Button type="primary" htmlType="submit">
+                  Update profile
+                </Button>
+                <Button
+                  style={{ marginTop: "1em" }}
+                  type="ghost"
+                  disabled={!changed}
+                  onClick={() => setCurrent(prev)}
+                >
+                  Cancel
+                </Button>
+              </div>
             </Form.Item>
           </Form>
           <Button

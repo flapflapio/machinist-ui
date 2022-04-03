@@ -2,9 +2,6 @@ import { Avatar, AvatarProps } from "antd";
 import styled from "styled-components";
 import { PROFILE_PIC, useAvatarLetter, useEmail, useProfilePic } from "./hook";
 
-const defaultProfilePic =
-  "https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png";
-
 type MeProps = Omit<AvatarProps, "src"> & { pic?: File };
 
 const StyledAvatar = styled(Avatar)`
@@ -26,5 +23,5 @@ const Me = ({ pic, ...props }: MeProps): JSX.Element => {
 };
 
 export type { MeProps };
-export { defaultProfilePic, Me, useProfilePic, useEmail, PROFILE_PIC };
+export { Me, useProfilePic, useEmail, PROFILE_PIC };
 export default Me;

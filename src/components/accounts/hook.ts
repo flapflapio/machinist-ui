@@ -1,18 +1,20 @@
 import { Auth, Storage } from "aws-amplify";
-import { useState, useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useProfile } from "./ProfileProvider";
 
 /**
  * @returns The user's email
  */
 const useEmail = (): string => {
-  const [email, setEmail] = useState("U");
+  const { profile, setProfile } = useProfile();
   useEffect(() => {
     Auth.currentAuthenticatedUser()
-      .then((user) => setEmail(user?.attributes?.email))
+      .then((user) =>
+        setProfile((p) => ({ ...p, email: user?.attributes?.email }))
+      )
       .catch(console.log);
-  }, []);
-  return email;
+  }, [setProfile]);
+  return profile.email;
 };
 
 /**
@@ -21,7 +23,7 @@ const useEmail = (): string => {
  */
 const useAvatarLetter = (): string => {
   const email = useEmail();
-  return useMemo(() => email.charAt(0).toUpperCase(), [email]);
+  return useMemo(() => email?.charAt(0).toUpperCase() ?? "U", [email]);
 };
 
 const PROFILE_PIC = "profile.png";
