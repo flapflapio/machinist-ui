@@ -15,9 +15,13 @@ const Me = ({ ...props }: MeProps): JSX.Element => {
   const src = useProfilePic();
   const alt = useAvatarLetter();
   return src === null ? (
-    <Avatar {...props}>{alt}</Avatar>
+    <Avatar {...props}>
+      <div>{alt}</div>
+    </Avatar>
   ) : (
-    <Avatar {...props} src={src} />
+    <Avatar {...props} src={src}>
+      <div />
+    </Avatar>
   );
 };
 

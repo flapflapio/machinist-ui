@@ -2,32 +2,27 @@ import { Menu } from "antd";
 import { ComponentPropsWithoutRef } from "react";
 import styled from "styled-components";
 import AccountDrawer from "../accounts/AccountDrawer";
-import { Me } from "../accounts/Avatar";
 
 const TopBarRoot = styled.div``;
 
-const AccountManagement = () => {
-  return (
-    <>
-      <AccountDrawer />
-      <Me />
-    </>
-  );
-};
+const StyledMenu = styled(Menu)`
+  border: 1px solid lightgray;
+  border-radius: 5px;
+`;
 
 type TopBarProps = ComponentPropsWithoutRef<"div">;
 const TopBar = ({ ...props }: TopBarProps) => {
   return (
     <TopBarRoot {...props}>
-      <Menu mode="horizontal" selectedKeys={[]}>
+      <StyledMenu mode="horizontal" selectedKeys={[]}>
         <Menu.Item>
-          <AccountManagement />
+          <AccountDrawer />
         </Menu.Item>
-      </Menu>
+      </StyledMenu>
     </TopBarRoot>
   );
 };
 
-export type { TopBarProps };
 export { TopBar };
+export type { TopBarProps };
 export default TopBar;

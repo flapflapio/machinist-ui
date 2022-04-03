@@ -1,6 +1,4 @@
-import { SettingOutlined } from "@ant-design/icons";
 import { Button, Drawer, Form, Input, Space } from "antd";
-import { stat } from "fs";
 import { useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
 import { BigMe, Me } from "./Avatar";
@@ -45,8 +43,11 @@ const useAccountDrawerState = () => {
     console.log(`Failed: ${errorInfo}`);
   }, []);
 
+  const signOut = useCallback(() => {}, []);
+
   return useMemo(
     () => ({
+      signOut,
       submitFailed,
       show,
       hide,
@@ -55,28 +56,23 @@ const useAccountDrawerState = () => {
       setState,
       submit,
     }),
-    [show, hide, state, setState, visible, submit, submitFailed]
+    [show, hide, state, setState, visible, submit, submitFailed, signOut]
   );
 };
 
 const AccountDrawer = () => {
-  const { show, hide, visible, submit, submitFailed } = useAccountDrawerState();
+  const { show, hide, visible, submit, submitFailed, signOut } =
+    useAccountDrawerState();
+
   return (
     <>
       <Space>
-        <Button
-          type="primary"
-          shape="circle"
-          icon={<SettingOutlined />}
-          size={"large"}
-          onClick={show}
-        ></Button>
         <div onClick={show}>
           <Me />
         </div>
       </Space>
       <Drawer
-        title={`User accounts`}
+        title={"Account"}
         placement="right"
         size="default"
         onClose={hide}
@@ -87,9 +83,7 @@ const AccountDrawer = () => {
           </Space>
         }
       >
-        <div></div>
         <FormRoot>
-          {/* <Me /> */}
           <BigMe />
           <Form
             name="basic"
@@ -134,6 +128,7 @@ const AccountDrawer = () => {
             </Form.Item>
           </Form>
           <Button
+            onClick={signOut}
             type="primary"
             shape="round"
             size={"large"}
