@@ -1,5 +1,6 @@
 import Draggable from "react-draggable";
 import styled from "styled-components";
+import ProfileProvider from "./accounts/ProfileProvider";
 import Canvas from "./canvas/Canvas";
 import { FloatingNodeMenu } from "./canvas/node/nodemenu/FloatingNodeMenu";
 import { DebuggerContextProvider } from "./data/debugger";
@@ -45,12 +46,14 @@ const App = (): JSX.Element => (
   <KeyChordsProvider>
     <GraphProvider>
       <SelectedNodeProvider>
-        <Main>
-          <FullscreenCanvas />
-          <MenuBarWithDebugger />
-          <FloatingNodeMenu />
-          <FloatingTopBar />
-        </Main>
+        <ProfileProvider>
+          <Main>
+            <FullscreenCanvas />
+            <MenuBarWithDebugger />
+            <FloatingNodeMenu />
+            <FloatingTopBar />
+          </Main>
+        </ProfileProvider>
       </SelectedNodeProvider>
     </GraphProvider>
   </KeyChordsProvider>

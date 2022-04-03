@@ -2,7 +2,8 @@ import { Button, Drawer, Form, Input, Space } from "antd";
 import { Auth } from "aws-amplify";
 import { useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
-import { BigMe, Me } from "./Avatar";
+import BigMe from "./BigMe";
+import { Me } from "./Me";
 
 const FormRoot = styled.div`
   display: flex;
@@ -111,7 +112,6 @@ const AccountDrawer = () => {
             >
               <Input />
             </Form.Item>
-
             <Form.Item
               label="Password"
               name="password"
