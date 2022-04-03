@@ -13,8 +13,9 @@ const BigMeRoot = styled.div`
 `;
 
 const ScaledMe = styled(Me)`
-  transform: scale(5);
+  transform: scale(6);
   margin: 5rem;
+  border: none;
 `;
 
 const EditMeRoot = styled.button`
@@ -23,7 +24,7 @@ const EditMeRoot = styled.button`
   border: 1px solid lightgray;
   border-radius: 5px;
   padding: 0.25em 0.5em;
-  top: 75%;
+  top: 85%;
   left: 1em;
   &:hover,
   & label {

@@ -1,10 +1,11 @@
 import { Button, Drawer, Form, Input, Space } from "antd";
 import { Auth } from "aws-amplify";
-import { useCallback, useMemo, useState } from "react";
+import { ChangeEvent, useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
 import BigMe from "./BigMe";
 import { useEmail } from "./hook";
 import { Me } from "./Me";
+import { useProfile } from "./ProfileProvider";
 
 const FormRoot = styled.div`
   display: flex;
@@ -12,10 +13,21 @@ const FormRoot = styled.div`
   align-content: center;
   align-items: center;
   height: 100%;
+  & > * {
+    margin: 0.5em auto;
+  }
 `;
 
 type FormValues = {
   email?: string;
+};
+
+const validateEmail = (email: string) => {
+  return email
+    .toLowerCase()
+    .match(
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    );
 };
 
 /**
@@ -40,39 +52,79 @@ const useAccountDrawerState = () => {
     [setState]
   );
 
-  const submit = useCallback((values: FormValues) => {
-    console.log(`Success: ${values}`);
-  }, []);
-
-  const submitFailed = useCallback((errorInfo) => {
-    console.log(`Failed: ${errorInfo}`);
-  }, []);
-
   const signOut = useCallback(() => Auth.signOut().catch(console.log), []);
 
   return useMemo(
     () => ({
       signOut,
-      submitFailed,
       show,
       hide,
       state,
       visible,
       setState,
-      submit,
     }),
-    [show, hide, state, setState, visible, submit, submitFailed, signOut]
+    [show, hide, state, setState, visible, signOut]
   );
 };
 
-const AccountDrawer = () => {
-  const { show, hide, visible, submit, submitFailed, signOut } =
-    useAccountDrawerState();
+const Row = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+`;
 
+const AccountDrawer = () => {
+  const { setProfile } = useProfile();
+  const { show, hide, visible, signOut } = useAccountDrawerState();
   const email = useEmail();
   const prev = useMemo<FormValues>(() => ({ email }), [email]);
   const [current, setCurrent] = useState<FormValues>(prev);
   const changed = useMemo(() => current.email !== prev.email, [current, prev]);
+  const [emailErr, setEmailErr] = useState(false);
+
+  const cancel = useCallback(() => {
+    setCurrent(prev);
+    setEmailErr(false);
+  }, [setCurrent, prev]);
+
+  const close = useCallback(() => {
+    hide();
+    cancel();
+  }, [hide, cancel]);
+
+  const emailChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      setEmailErr(false);
+      setCurrent((c) => ({ ...c, email: e.target.value }));
+    },
+    [setCurrent, setEmailErr]
+  );
+
+  const submit = useCallback(() => {
+    if (!validateEmail(current.email)) {
+      setEmailErr(true);
+      return;
+    }
+
+    // Otherwise, call amplify to change the email
+    (async () => {
+      const user = await Auth.currentAuthenticatedUser();
+      const result = await Auth.updateUserAttributes(user, {
+        email: current.email,
+      });
+      console.log(result);
+
+      // Change the email in the state store
+      const newEmail =
+        (await Auth.currentAuthenticatedUser()).attributes?.email ??
+        user.attributes?.email;
+
+      setProfile((p) => ({ ...p, email: newEmail }));
+    })().catch((err) => {
+      setEmailErr(true);
+      throw err;
+    });
+  }, [setEmailErr, current.email, setProfile]);
 
   return (
     <>
@@ -85,7 +137,7 @@ const AccountDrawer = () => {
         title={"Account"}
         placement="right"
         size="default"
-        onClose={hide}
+        onClose={close}
         visible={visible}
         extra={
           <Space>
@@ -95,58 +147,35 @@ const AccountDrawer = () => {
       >
         <FormRoot>
           <BigMe />
-          <Form
-            name="basic"
-            labelCol={{ span: 8 }}
-            wrapperCol={{ span: 16 }}
-            initialValues={{ remember: true }}
-            autoComplete="off"
-            onFinish={submit}
-            onFinishFailed={submitFailed}
+          <Row>
+            <h3>Email: </h3>
+            <Input value={current?.email ?? ""} onChange={emailChange} />
+            {emailErr && <div style={{ color: "red" }}>Invalid email!</div>}
+          </Row>
+          <Row>
+            <h3>Password: </h3>
+            <Button>Change password</Button>
+          </Row>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              width: "10em",
+              marginTop: "1.5em",
+            }}
           >
-            <Form.Item
-              label="Email"
-              name="email"
-              rules={[{ required: false, message: "Please input your email!" }]}
+            <Button type="primary" htmlType="submit" onClick={submit}>
+              Update profile
+            </Button>
+            <Button
+              style={{ marginTop: "0.5em" }}
+              type="ghost"
+              disabled={!changed}
+              onClick={cancel}
             >
-              <Input
-                value={current?.email ?? ""}
-                onChange={(e) =>
-                  setCurrent((c) => ({ ...c, email: e.target.value }))
-                }
-              />
-            </Form.Item>
-            <Form.Item
-              label="Password"
-              name="password"
-              rules={[
-                { required: false, message: "Please input your password!" },
-              ]}
-            >
-              <Input.Password />
-            </Form.Item>
-            <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  width: "10em",
-                }}
-              >
-                <Button type="primary" htmlType="submit">
-                  Update profile
-                </Button>
-                <Button
-                  style={{ marginTop: "1em" }}
-                  type="ghost"
-                  disabled={!changed}
-                  onClick={() => setCurrent(prev)}
-                >
-                  Cancel
-                </Button>
-              </div>
-            </Form.Item>
-          </Form>
+              Cancel
+            </Button>
+          </div>
           <Button
             onClick={signOut}
             type="primary"
