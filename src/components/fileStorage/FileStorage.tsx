@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useState } from "react";
-import { Modal, Button } from "antd";
-import FileStorageTable, { Record, RecordUpload } from "./FileStorageTable";
+import { ProfileOutlined } from "@ant-design/icons";
+import { Modal } from "antd";
 import { Storage } from "aws-amplify";
+import { useCallback, useEffect, useState } from "react";
 import { prettySize } from "../../util/utils";
+import FileStorageTable, { Record, RecordUpload } from "./FileStorageTable";
 
 const FileStorage = () => {
   const [visible, setVisible] = useState(false);
@@ -39,16 +40,17 @@ const FileStorage = () => {
             setDataSource([]);
             throw err;
           }),
-      1000
+      3000
     );
     return () => clearInterval(interval);
   }, [setDataSource]);
 
   return (
     <>
-      <Button shape="circle" type="primary" onClick={() => setVisible(true)}>
-        Open File Manager
-      </Button>
+      <ProfileOutlined
+        style={{ transform: "scale(2)" }}
+        onClick={() => setVisible(true)}
+      />
       <Modal
         title="File Manager"
         centered
@@ -62,6 +64,7 @@ const FileStorage = () => {
           setDataSource={setDataSource}
           deleteFile={deleteFile}
           saveFile={saveFile}
+          closeModal={() => setVisible(false)}
         />
       </Modal>
     </>
@@ -69,3 +72,4 @@ const FileStorage = () => {
 };
 
 export default FileStorage;
+export { FileStorage };

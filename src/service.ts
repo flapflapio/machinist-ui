@@ -1,6 +1,8 @@
 /**
  * This package encapsulates all API calls made from the web app
  */
+import { PutResult, StorageGetOutput } from "@aws-amplify/storage";
+import { Storage } from "aws-amplify";
 import { Graph } from "./components/data/graph";
 import { api } from "./util/utils";
 
@@ -56,12 +58,14 @@ const prepareMachine = (graph: Graph): PreppedMachine => ({
   })),
 });
 
+const toPreppedMachine = (machine: PreppedMachine | Graph): PreppedMachine =>
+  isPreppedMachine(machine) ? machine : prepareMachine(machine);
+
 const simulate = async (
   machine: PreppedMachine | Graph,
   tape: string
 ): Promise<SimulationResponse> => {
-  const mach = isPreppedMachine(machine) ? machine : prepareMachine(machine);
-  // console.log(JSON.stringify({ a: 1, b: mach }));
+  const mach = toPreppedMachine(machine);
   const posted = await fetch(apis.simulate(tape), {
     method: "POST",
     headers: {
@@ -75,5 +79,36 @@ const simulate = async (
   return response;
 };
 
-export { simulate, prepareMachine, isPreppedMachine };
+const cleanFilename = (filename: string) =>
+  !filename.endsWith(".json") ? `${filename}.json` : filename;
+
+/**
+ * @param filename The filename to save the machine under
+ * @param machine The machine as an object
+ * @returns The result of calling Storage.Put
+ */
+const saveMachine = (
+  filename: string,
+  machine: PreppedMachine | Graph
+): Promise<PutResult> => {
+  const mach = toPreppedMachine(machine);
+  const file = cleanFilename(filename);
+  return Storage.put(file, JSON.stringify(mach, null, 2), {
+    level: "private",
+  });
+};
+
+/**
+ * @param filename The name of the file to grab
+ * @returns A deserialized machine
+ */
+const loadMachine = async (filename: string) => {
+  const file = cleanFilename(filename);
+  const got = await Storage.get(file, { level: "private", download: true });
+  const data = await (got.Body as Blob).text();
+  const graph: Graph = JSON.parse(data);
+  return graph;
+};
+
+export { simulate, prepareMachine, isPreppedMachine, saveMachine, loadMachine };
 export type { PreppedMachine };

@@ -1,6 +1,12 @@
 import { DeleteOutlined } from "@ant-design/icons";
 import { Table } from "antd";
-import { ComponentPropsWithoutRef, Dispatch, SetStateAction } from "react";
+import { GetComponentProps } from "rc-table/lib/interface";
+import {
+  ComponentPropsWithoutRef,
+  Dispatch,
+  SetStateAction,
+  useCallback,
+} from "react";
 
 type Record = {
   name: string;
@@ -18,13 +24,16 @@ type FileStorageTableProps = {
   setDataSource?: Dispatch<SetStateAction<Record[]>>;
   deleteFile?: (record: Record) => void;
   saveFile?: (upload: RecordUpload) => void;
+  closeModal?: () => void;
 } & ComponentPropsWithoutRef<"div">;
 
+const noop = () => null;
 const FileStorageTable = ({
   dataSource = [],
-  setDataSource = () => null,
-  deleteFile = () => null,
-  saveFile = () => null,
+  setDataSource = noop,
+  deleteFile = noop,
+  saveFile = noop,
+  closeModal = noop,
   ...props
 }: FileStorageTableProps) => {
   const columns = [
@@ -59,20 +68,20 @@ const FileStorageTable = ({
     },
   ];
 
+  const onRow = useCallback<GetComponentProps<Record>>(
+    (record) => ({
+      onDoubleClick(e) {
+        console.log(record);
+        closeModal();
+      },
+    }),
+    [closeModal]
+  );
+
   return (
     <div {...props}>
-      <button
-        onClick={() => {
-          const name = Math.random().toString(36).substring(2, 7);
-          return saveFile({
-            name,
-            contents: `My file: ${name}`.repeat(1 << 10),
-          });
-        }}
-      >
-        Upload new file
-      </button>
       <Table
+        onRow={onRow}
         columns={columns}
         dataSource={dataSource}
         pagination={{ pageSize: 10 }}
@@ -82,4 +91,4 @@ const FileStorageTable = ({
 };
 
 export default FileStorageTable;
-export type { Record, RecordUpload };
+export type { Record, RecordUpload, noop };
