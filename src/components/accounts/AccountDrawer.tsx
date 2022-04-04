@@ -1,6 +1,6 @@
-import { Button, Drawer, Form, Input, Space } from "antd";
+import { Button, Drawer, Form, Input, Modal, Space } from "antd";
 import { Auth } from "aws-amplify";
-import { ChangeEvent, useCallback, useMemo, useState } from "react";
+import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import BigMe from "./BigMe";
 import { useEmail } from "./hook";
@@ -82,6 +82,16 @@ const AccountDrawer = () => {
   const changed = useMemo(() => current.email !== prev.email, [current, prev]);
   const [emailErr, setEmailErr] = useState(false);
 
+  useEffect(() => {
+    Auth.currentAuthenticatedUser()
+      .then((user) => {
+        const email = user?.attributes?.email;
+        setProfile((p) => ({ ...p, email }));
+        setCurrent((c) => ({ ...c, email }));
+      })
+      .catch(console.log);
+  }, []);
+
   const cancel = useCallback(() => {
     setCurrent(prev);
     setEmailErr(false);
@@ -126,6 +136,9 @@ const AccountDrawer = () => {
     });
   }, [setEmailErr, current.email, setProfile]);
 
+  const [changePasswordModalVisible, setChangePasswordModalVisible] =
+    useState(false);
+
   return (
     <>
       <Space>
@@ -154,7 +167,101 @@ const AccountDrawer = () => {
           </Row>
           <Row>
             <h3>Password: </h3>
-            <Button>Change password</Button>
+            <Button onClick={() => setChangePasswordModalVisible((x) => !x)}>
+              Change password
+            </Button>
+            <Modal
+              title="Change password"
+              visible={changePasswordModalVisible}
+              onOk={() => setChangePasswordModalVisible(false)}
+              onCancel={() => setChangePasswordModalVisible(false)}
+              footer={[
+                <Button
+                  key="cancel"
+                  type="ghost"
+                  onClick={() => setChangePasswordModalVisible(false)}
+                >
+                  Cancel
+                </Button>,
+              ]}
+            >
+              <Form
+                name="basic"
+                labelCol={{ span: 8 }}
+                wrapperCol={{ span: 16 }}
+                initialValues={{ remember: true }}
+                onFinish={({
+                  oldpass,
+                  newpass,
+                }: {
+                  oldpass?: string;
+                  newpass?: string;
+                  newpass2?: string;
+                }) => {
+                  Auth.currentAuthenticatedUser()
+                    .then((user) => Auth.changePassword(user, oldpass, newpass))
+                    .then(console.log)
+                    .then(() => setChangePasswordModalVisible(false))
+                    .catch(console.log);
+                }}
+                onFinishFailed={console.log}
+                autoComplete="off"
+              >
+                <Form.Item
+                  label="Old password"
+                  name="oldpass"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please enter your old password...",
+                    },
+                  ]}
+                >
+                  <Input.Password />
+                </Form.Item>
+                <Form.Item
+                  label="New password"
+                  name="newpass"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please enter your new password...",
+                    },
+                  ]}
+                >
+                  <Input.Password />
+                </Form.Item>
+                <Form.Item
+                  label="Confirm password"
+                  name="newpass2"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please enter your new password again...",
+                    },
+                    ({ getFieldValue }) => ({
+                      validator(_, value) {
+                        if (!value || getFieldValue("newpass") === value) {
+                          return Promise.resolve();
+                        }
+                        return Promise.reject(
+                          new Error(
+                            "The two passwords that you entered do not match..."
+                          )
+                        );
+                      },
+                    }),
+                  ]}
+                >
+                  <Input.Password />
+                </Form.Item>
+                <Form.Item wrapperCol={{ offset: 10 }}>
+                  <Button type="primary" htmlType="submit">
+                    Submit
+                  </Button>
+                </Form.Item>
+              </Form>
+            </Modal>
           </Row>
           <div
             style={{
