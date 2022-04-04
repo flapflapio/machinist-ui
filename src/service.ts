@@ -3,7 +3,7 @@
  */
 import { PutResult, StorageGetOutput } from "@aws-amplify/storage";
 import { Storage } from "aws-amplify";
-import { Graph } from "./components/data/graph";
+import { Graph, State, Transition } from "./components/data/graph";
 import { api } from "./util/utils";
 
 // Routes for all the different APIs
@@ -82,18 +82,31 @@ const simulate = async (
 const cleanFilename = (filename: string) =>
   !filename.endsWith(".json") ? `${filename}.json` : filename;
 
+type PartialGraph = {
+  states: State[];
+  transitions: Transition[];
+  starting: string;
+};
+
+/**
+ * Reads only the states from a machine, removes cyclic references
+ */
+const toPartialMachine = (machine: Graph): PartialGraph => ({
+  starting: machine.starting,
+  states: machine.states.map((s) => ({ ...s, ref: null })),
+  transitions: machine.transitions.map((t) => ({ ...t, ref: null })),
+});
+
 /**
  * @param filename The filename to save the machine under
  * @param machine The machine as an object
  * @returns The result of calling Storage.Put
  */
-const saveMachine = (
-  filename: string,
-  machine: PreppedMachine | Graph
-): Promise<PutResult> => {
-  const mach = toPreppedMachine(machine);
+const saveMachine = (filename: string, machine: Graph): Promise<PutResult> => {
+  const cleanedMachine = toPartialMachine(machine);
+  const mach = JSON.stringify(cleanedMachine, null, 2);
   const file = cleanFilename(filename);
-  return Storage.put(file, JSON.stringify(mach, null, 2), {
+  return Storage.put(file, mach, {
     level: "private",
   });
 };
@@ -106,9 +119,9 @@ const loadMachine = async (filename: string) => {
   const file = cleanFilename(filename);
   const got = await Storage.get(file, { level: "private", download: true });
   const data = await (got.Body as Blob).text();
-  const graph: Graph = JSON.parse(data);
+  const graph: PartialGraph = JSON.parse(data);
   return graph;
 };
 
 export { simulate, prepareMachine, isPreppedMachine, saveMachine, loadMachine };
-export type { PreppedMachine };
+export type { PreppedMachine, PartialGraph };

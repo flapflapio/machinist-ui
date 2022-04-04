@@ -6,7 +6,10 @@ import {
   Dispatch,
   SetStateAction,
   useCallback,
+  useMemo,
 } from "react";
+import { loadMachine } from "../../service";
+import { useGraph } from "../data/graph";
 
 type Record = {
   name: string;
@@ -36,46 +39,57 @@ const FileStorageTable = ({
   closeModal = noop,
   ...props
 }: FileStorageTableProps) => {
-  const columns = [
-    {
-      title: "File Name",
-      dataIndex: "name",
-      key: "name",
-    },
-    {
-      title: "Size",
-      dataIndex: "size",
-      key: "size",
-      width: 150,
-    },
-    {
-      title: "Last Modified",
-      dataIndex: "lastModified",
-      key: "lastModified",
-      width: 150,
-    },
-    {
-      title: "Actions",
-      width: 150,
-      render: (record: Record) => (
-        <>
-          <DeleteOutlined
-            onClick={() => deleteFile(record)}
-            style={{ color: "red", marginLeft: 12 }}
-          />
-        </>
-      ),
-    },
-  ];
+  const { dispatch } = useGraph();
+
+  const columns = useMemo(
+    () => [
+      {
+        title: "File Name",
+        dataIndex: "name",
+        key: "name",
+      },
+      {
+        title: "Size",
+        dataIndex: "size",
+        key: "size",
+        width: 150,
+      },
+      {
+        title: "Last Modified",
+        dataIndex: "lastModified",
+        key: "lastModified",
+        width: 150,
+      },
+      {
+        title: "Actions",
+        width: 150,
+        render: (record: Record) => (
+          <>
+            <DeleteOutlined
+              onClick={() => deleteFile(record)}
+              style={{ color: "red", marginLeft: 12 }}
+            />
+          </>
+        ),
+      },
+    ],
+    [deleteFile]
+  );
 
   const onRow = useCallback<GetComponentProps<Record>>(
     (record) => ({
       onDoubleClick(e) {
-        console.log(record);
-        closeModal();
+        loadMachine(record.name)
+          .then((states) =>
+            dispatch({
+              type: "MANIPULATE",
+              manipulation: (g) => ({ ...g, ...states }),
+            })
+          )
+          .then(closeModal);
       },
     }),
-    [closeModal]
+    [closeModal, dispatch]
   );
 
   return (
