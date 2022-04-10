@@ -216,7 +216,7 @@ const FileListing = ({ ...props }) => {
           .then((result) => {
             setFiles(result.map((r) => r.key));
           })
-          .catch((err) => {
+          .catch((_err) => {
             setFiles([]);
           }),
       500
