@@ -19,6 +19,16 @@ const FormRoot = styled.div`
   height: 100%;
 `;
 
+const AvatarSpace = () =>{
+  return(
+  <Space>
+  <Avatar
+    size="large"
+    src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
+  />
+  </Space>)
+};
+
 const BigAvatar = styled(Avatar)`
   width: 10em;
   height: 10em;
@@ -76,12 +86,7 @@ const Drawer = () => {
         onClose={onClose}
         visible={visible}
         extra={
-          <Space>
-            <Avatar
-              size="large"
-              src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
-            />
-          </Space>
+          <AvatarSpace />
         }
       >
         <div></div>
