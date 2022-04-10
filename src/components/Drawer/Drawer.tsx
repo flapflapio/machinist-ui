@@ -24,6 +24,18 @@ const BigAvatar = styled(Avatar)`
   height: 10em;
 `;
 
+const SettingsButton = ({ onClick }) => {
+  return (
+    <Button
+      type="primary"
+      shape="circle"
+      icon={<SettingOutlined />}
+      size={"large"}
+      onClick={onClick}
+    ></Button>
+  );
+};
+
 const Drawer = () => {
   const [visible, setVisible] = useState(false);
   const [size, setSize] = useState<"default" | "large">("default");
@@ -48,13 +60,7 @@ const Drawer = () => {
   return (
     <>
       <Space>
-        <Button
-          type="primary"
-          shape="circle"
-          icon={<SettingOutlined />}
-          size={"large"}
-          onClick={showDefaultDrawer}
-        ></Button>
+        <SettingsButton onClick={showDefaultDrawer} />
         <div onClick={showDefaultDrawer}>
           <Avatar
             size="large"
