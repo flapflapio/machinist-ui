@@ -7,7 +7,6 @@ import {
   ChangeEvent,
   Dispatch,
   MouseEvent,
-  MouseEventHandler,
   SetStateAction,
   useCallback,
   useEffect,
@@ -146,7 +145,7 @@ const useModal = (filename: string = "") => {
     }
     Storage.get(modal.title, { level: "private", download: true })
       // .then((data) => "")
-      .then((data) => data?.Body?.text?.())
+      .then((data) => (data?.Body as Blob).text())
       .then((contents) => setModal((m) => ({ ...m, contents })))
       .catch((err) => setModal((m) => ({ ...m, title: "", contents: err })));
   }, [modal, setModal]);
