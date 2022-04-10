@@ -19,6 +19,18 @@ const FormRoot = styled.div`
   height: 100%;
 `;
 
+const SignOutButton = ()=> {
+  return(
+    <Button
+    type="primary"
+    shape="round"
+    size={"large"}
+    style={{ marginTop: "auto" }}
+  >
+    Sign out
+  </Button>
+  )
+};
 const AvatarSpace = () =>{
   return(
   <Space>
@@ -137,14 +149,7 @@ const Drawer = () => {
               </Button>
             </Form.Item>
           </Form>
-          <Button
-            type="primary"
-            shape="round"
-            size={"large"}
-            style={{ marginTop: "auto" }}
-          >
-            Sign out
-          </Button>
+              <SignOutButton />
         </FormRoot>
       </Drawerant>
     </>
