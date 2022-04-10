@@ -19,6 +19,14 @@ const FormRoot = styled.div`
   height: 100%;
 `;
 
+const ModifyButton =() => {
+  return(
+  <Button type="primary" htmlType="submit">
+    Modify
+  </Button>
+  )
+}
+
 const SignOutButton = ()=> {
   return(
     <Button
@@ -144,9 +152,7 @@ const Drawer = () => {
             </Form.Item>
 
             <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-              <Button type="primary" htmlType="submit">
-                Modify
-              </Button>
+              <ModifyButton />
             </Form.Item>
           </Form>
               <SignOutButton />
